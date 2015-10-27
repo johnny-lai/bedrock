@@ -30,6 +30,9 @@ func GetConfig(yamlPath string) (map[interface{}]interface{}, error) {
 
   err = yaml.Unmarshal([]byte(ymlData), &config)
 
+  for _, value := range config {
+    value = os.Expand(value.(string), os.Getenv)
+  }
   /*config.SvcHost = os.Expand(config.SvcHost, os.Getenv)
   config.DbUser = os.Expand(config.DbUser, os.Getenv)
   config.DbPassword = os.Expand(config.DbPassword, os.Getenv)
