@@ -8,6 +8,8 @@ VERSION = $(MAJOR_VERSION).$(MINOR_VERSION).$(BUILD_NUMBER)
 
 DOCKER_DEVIMAGE ?= johnnylai/golang-dev
 
+APP_ITEST_ENV_ROOT ?= $(SRCROOT)/itest/env
+
 # These are local paths
 SRCROOT ?= $(realpath .)
 BUILD_ROOT ?= $(SRCROOT)
@@ -55,15 +57,15 @@ itest:
 bench:
 	TEST_HOST="http://$(SERVER):$(PORT)" go test -bench=. $(APP_NAME)/itest
 
-itestenv-restart: itestenv-stop itestenv-start
+itest-env-restart: itest-env-stop itest-env-start
 	
-itestenv-start:
-	for n in $(SRCROOT)/*.yml; do \
+itest-env-start:
+	for n in $(APP_ITEST_ENV_ROOT)/*.yml; do \
 		cat $$n | $(KUBECTL) create -f - ; \
 	done
 	$(RUN_IN_DEV) wait-for-pod.sh go-service-basic
 
-itestenv-stop:
+itest-env-stop:
 	docker run --rm -i --net=host $(DOCKER_DEVIMAGE) kubectl delete all -lapp=$(APP_NAME)
 
 fmt:
