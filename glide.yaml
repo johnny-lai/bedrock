@@ -1,8 +1,0 @@
-package: bedrock
-import:
-  - package: gopkg.in/yaml.v1
-    ref:     9f9df34309c04878acc86042b16630b0f696e1de
-  - package: github.com/codegangsta/cli
-    ref:     f445c894402839580d30de47551cedc152dad814
-  - package: github.com/gin-gonic/gin
-    ref:     52fcc5dbf6e94df33ad313858fb94b713e9d1b4a
