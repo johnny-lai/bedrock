@@ -24,6 +24,10 @@ TEST_CONFIG_YML_D = $(SRCROOT_D)/config/production.yml
 SERVER ?= $(shell kubectl get svc go-service-basic -o json | jq -r '.spec.clusterIP')
 PORT ?= $(shell kubectl get svc go-service-basic -o json | jq '.spec.ports[0].targetPort')
 
+# For itest
+RUN_IN_DEV = docker run --rm --net=host -i $(DOCKER_DEVIMAGE)
+KUBECTL = $(RUN_IN_DEV) kubectl
+
 default: build
 
 clean:
@@ -51,8 +55,16 @@ itest:
 bench:
 	TEST_HOST="http://$(SERVER):$(PORT)" go test -bench=. $(APP_NAME)/itest
 
-itest-env-restart:
-	cd itest/env && make restart
+itestenv-restart: itestenv-stop itestenv-start
+	
+itestenv-start:
+	for n in $(SRCROOT)/*.yml; do \
+		cat $$n | $(KUBECTL) create -f - ; \
+	done
+	$(RUN_IN_DEV) wait-for-pod.sh go-service-basic
+
+itestenv-stop:
+	docker run --rm -i --net=host $(DOCKER_DEVIMAGE) kubectl delete all -lapp=$(APP_NAME)
 
 fmt:
 	GO15VENDOREXPERIMENT=1 go fmt $(APP_GO_PACKAGES)
