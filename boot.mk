@@ -33,6 +33,7 @@ KUBECTL = $(RUN_IN_DEV) kubectl
 default: build
 
 clean:
+	go clean
 	rm -f $(BUILD_ROOT)/$(APP_NAME)
 	rm -rf tmp
 
@@ -66,7 +67,7 @@ itest-env-start:
 	$(RUN_IN_DEV) wait-for-pod.sh go-service-basic
 
 itest-env-stop:
-	docker run --rm -i --net=host $(DOCKER_DEVIMAGE) kubectl delete all -lapp=$(APP_NAME)
+	-docker run --rm -i --net=host $(DOCKER_DEVIMAGE) kubectl delete all -lapp=$(APP_NAME)
 
 fmt:
 	GO15VENDOREXPERIMENT=1 go fmt $(APP_GO_PACKAGES)

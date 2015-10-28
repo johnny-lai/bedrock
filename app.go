@@ -5,42 +5,32 @@ import (
   "fmt"
   "github.com/codegangsta/cli"
   "github.com/gin-gonic/gin"
-  "gopkg.in/yaml.v1"
+  "github.com/johnny-lai/yaml.v2"
   "io/ioutil"
   "os"
   "log"
 )
 
 type AppServicer interface {
-  Migrate(cfg map[interface{}]interface{}) error
-  Build(cfg map[interface{}]interface{}, r *gin.Engine) error
+  Config() interface{}
+  Migrate() error
+  Build(r *gin.Engine) error
+  Run(r *gin.Engine) error
 }
 
-func GetConfig(yamlPath string) (map[interface{}]interface{}, error) {
-  config := make(map[interface{}]interface{})
-
+func GetConfig(yamlPath string, config interface{}) error {
   if _, err := os.Stat(yamlPath); err != nil {
-    return config, errors.New("config path not valid")
+    return errors.New("config path not valid")
   }
 
   ymlData, err := ioutil.ReadFile(yamlPath)
   if err != nil {
-    return config, err
+    return err
   }
 
-  err = yaml.Unmarshal([]byte(ymlData), &config)
+  err = yaml.Unmarshal([]byte(ymlData), config)
 
-  for key, value := range config {
-    config[key] = os.Expand(value.(string), os.Getenv)
-  }
-  /*config.SvcHost = os.Expand(config.SvcHost, os.Getenv)
-  config.DbUser = os.Expand(config.DbUser, os.Getenv)
-  config.DbPassword = os.Expand(config.DbPassword, os.Getenv)
-  config.DbHost = os.Expand(config.DbHost, os.Getenv)
-  config.DbName = os.Expand(config.DbName, os.Getenv)
-  */
-
-  return config, err
+  return err
 }
 
 func NewApp(svc AppServicer) *cli.App {
@@ -59,13 +49,13 @@ func NewApp(svc AppServicer) *cli.App {
       Name:  "env",
       Usage: "Print the configurations",
       Action: func(c *cli.Context) {
-        cfg, err := GetConfig(c.GlobalString("config"))
+        err := GetConfig(c.GlobalString("config"), svc.Config())
         if err != nil {
           log.Fatal(err)
           return
         }
 
-        d, err := yaml.Marshal(&cfg)
+        d, err := yaml.Marshal(svc.Config())
         if err != nil {
           log.Fatalf("error: %v", err)
         }
@@ -76,31 +66,39 @@ func NewApp(svc AppServicer) *cli.App {
       Name:  "server",
       Usage: "Run the http server",
       Action: func(c *cli.Context) {
-        cfg, err := GetConfig(c.GlobalString("config"))
+        err := GetConfig(c.GlobalString("config"), svc.Config())
         if err != nil {
           log.Fatal(err)
           return
         }
-
+/*
+        if err := svc.SetConfigFromYaml(cfg); err != nil {
+          log.Fatal(err)
+        }
+*/
         r := gin.Default()
-        if err = svc.Build(cfg, r); err != nil {
+        if err = svc.Build(r); err != nil {
           log.Fatal(err)
         }
 
-        r.Run(cfg["SvcHost"].(string))
+        svc.Run(r)
       },
     },
     {
       Name:  "migratedb",
       Usage: "Perform database migrations",
       Action: func(c *cli.Context) {
-        cfg, err := GetConfig(c.GlobalString("config"))
+        err := GetConfig(c.GlobalString("config"), svc.Config())
         if err != nil {
           log.Fatal(err)
           return
         }
-
-        if err = svc.Migrate(cfg); err != nil {
+/*
+        if err := svc.SetConfigFromYaml(cfg); err != nil {
+          log.Fatal(err)
+        }
+*/
+        if err = svc.Migrate(); err != nil {
           log.Fatal(err)
         }
       },
