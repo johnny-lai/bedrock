@@ -34,6 +34,7 @@ default: build
 
 clean:
 	go clean
+	git clean -ffxd vendor
 	rm -f $(BUILD_ROOT)/$(APP_NAME)
 	rm -rf tmp
 
