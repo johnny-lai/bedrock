@@ -6,7 +6,7 @@ BUILD_NUMBER ?= 0
 COMMIT ?= $(shell git log --pretty=format:'%h' -n 1)
 VERSION = $(MAJOR_VERSION).$(MINOR_VERSION).$(BUILD_NUMBER)
 
-DOCKER_DEVIMAGE ?= johnnylai/golang-dev
+DOCKER_DEVIMAGE ?= johnnylai/bedrock-dev
 DOCKER_DEV_UID ?= #2000 #$(shell which docker-machine &> /dev/null || id -u)
 DOCKER_DEV_GID ?= #2000 #$(shell which docker-machine &> /dev/null || id -g)
 
@@ -61,15 +61,13 @@ itest:
 bench:
 	TEST_HOST="http://$(SERVER):$(PORT)" go test -bench=. $(APP_NAME)/itest
 
-itest-env-restart: itest-env-stop itest-env-start
-	
-itest-env-start:
+itest.env.start:
 	for n in $(APP_ITEST_ENV_ROOT)/*.yml; do \
 		cat $$n | $(KUBECTL) create -f - ; \
 	done
 	$(RUN_IN_DEV) wait-for-pod.sh go-service-basic
 
-itest-env-stop:
+itest.env.stop:
 	-docker run --rm -i --net=host $(DOCKER_DEVIMAGE) kubectl delete all -lapp=$(APP_NAME)
 
 fmt:
@@ -92,10 +90,14 @@ devconsole:
 
 dist: image-dist image-testdb
 
-distbuild: clean build
-	chown -R $(UID):$(GID) $(SRCROOT)
+distbuild: $(PRODUCT_PATH)
 
-distitest:
+#-------------------------------------------------------------------------------
+distitest: distitest.env distitest.run
+
+distitest.env: itest.env.stop itest.env.start
+
+distitest.run:
 	docker run --rm --net=host \
 	           -v $(SRCROOT):$(SRCROOT_D) \
  	           -w $(SRCROOT_D) \
@@ -104,7 +106,12 @@ distitest:
 	           $(DOCKER_DEVIMAGE) \
 	           make itest
 
-distibench:
+#-------------------------------------------------------------------------------
+distibench: distibench.env distibench.run
+
+distibench.env: itest.env.stop itest.env.start
+
+distibench.run:
 	docker run --rm --net=host \
 	           -v $(SRCROOT):$(SRCROOT_D) \
  	           -w $(SRCROOT_D)/itest \
@@ -113,9 +120,14 @@ distibench:
 	           $(DOCKER_DEVIMAGE) \
 	           make bench
 
-distutest:
+#-------------------------------------------------------------------------------
+distutest: distutest.env distutest.run
+
+distutest.env:
 	-docker rm -f $(APP_NAME)-testdb
 	docker run -d --name $(APP_NAME)-testdb $(APP_DOCKER_LABEL)-testdb
+
+distutest.run:
 	docker run --rm \
 	           --link $(APP_NAME)-testdb:$(APP_NAME)-db \
 	           -v $(SRCROOT):$(SRCROOT_D) \
@@ -127,7 +139,8 @@ distutest:
 	           $(DOCKER_DEVIMAGE) \
 	           make utest
 
-deploy: distutest dist itest-env-restart distitest
+#-------------------------------------------------------------------------------
+deploy: distutest dist distitest
 	docker push $(APP_DOCKER_LABEL)
 
 .PHONY: build clean default deploy deps dist distbuild fmt migrate itest utest
@@ -135,7 +148,7 @@ deploy: distutest dist itest-env-restart distitest
 image-testdb:
 	docker build -f $(DOCKER_ROOT)/testdb/Dockerfile -t $(APP_DOCKER_LABEL)-testdb .
 
-image-dist: $(PRODUCT_PATH)
+image-dist: distbuild
 	docker build -f $(DOCKER_ROOT)/dist/Dockerfile -t $(APP_DOCKER_LABEL) .
 
 $(GLIDE):
@@ -153,4 +166,4 @@ $(PRODUCT_PATH): $(wildcard *.go)
 	           -e DEV_UID=$(DOCKER_DEV_UID) \
 	           -e DEV_GID=$(DOCKER_DEV_GID) \
 	           $(DOCKER_DEVIMAGE) \
-	           make distbuild
+	           make build
