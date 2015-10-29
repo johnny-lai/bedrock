@@ -7,8 +7,8 @@ COMMIT ?= $(shell git log --pretty=format:'%h' -n 1)
 VERSION = $(MAJOR_VERSION).$(MINOR_VERSION).$(BUILD_NUMBER)
 
 DOCKER_DEVIMAGE ?= johnnylai/bedrock-dev
-DOCKER_DEV_UID ?= #2000 #$(shell which docker-machine &> /dev/null || id -u)
-DOCKER_DEV_GID ?= #2000 #$(shell which docker-machine &> /dev/null || id -g)
+DOCKER_DEV_UID ?= $(shell which docker-machine &> /dev/null || id -u)
+DOCKER_DEV_GID ?= $(shell which docker-machine &> /dev/null || id -g)
 
 APP_ITEST_ENV_ROOT ?= $(SRCROOT)/itest/env
 
