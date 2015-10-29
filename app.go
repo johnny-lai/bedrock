@@ -5,7 +5,7 @@ import (
   "fmt"
   "github.com/codegangsta/cli"
   "github.com/gin-gonic/gin"
-  "github.com/johnny-lai/yaml.v2"
+  "github.com/johnny-lai/yaml"
   "io/ioutil"
   "os"
   "log"
@@ -18,7 +18,7 @@ type AppServicer interface {
   Run(r *gin.Engine) error
 }
 
-func GetConfig(yamlPath string, config interface{}) error {
+func ReadConfig(yamlPath string, config interface{}) error {
   if _, err := os.Stat(yamlPath); err != nil {
     return errors.New("config path not valid")
   }
@@ -49,7 +49,7 @@ func NewApp(svc AppServicer) *cli.App {
       Name:  "env",
       Usage: "Print the configurations",
       Action: func(c *cli.Context) {
-        err := GetConfig(c.GlobalString("config"), svc.Config())
+        err := ReadConfig(c.GlobalString("config"), svc.Config())
         if err != nil {
           log.Fatal(err)
           return
@@ -66,16 +66,12 @@ func NewApp(svc AppServicer) *cli.App {
       Name:  "server",
       Usage: "Run the http server",
       Action: func(c *cli.Context) {
-        err := GetConfig(c.GlobalString("config"), svc.Config())
+        err := ReadConfig(c.GlobalString("config"), svc.Config())
         if err != nil {
           log.Fatal(err)
           return
         }
-/*
-        if err := svc.SetConfigFromYaml(cfg); err != nil {
-          log.Fatal(err)
-        }
-*/
+
         r := gin.Default()
         if err = svc.Build(r); err != nil {
           log.Fatal(err)
@@ -85,19 +81,15 @@ func NewApp(svc AppServicer) *cli.App {
       },
     },
     {
-      Name:  "migratedb",
+      Name:  "migrate",
       Usage: "Perform database migrations",
       Action: func(c *cli.Context) {
-        err := GetConfig(c.GlobalString("config"), svc.Config())
+        err := ReadConfig(c.GlobalString("config"), svc.Config())
         if err != nil {
           log.Fatal(err)
           return
         }
-/*
-        if err := svc.SetConfigFromYaml(cfg); err != nil {
-          log.Fatal(err)
-        }
-*/
+
         if err = svc.Migrate(); err != nil {
           log.Fatal(err)
         }
