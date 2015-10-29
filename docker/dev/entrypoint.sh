@@ -12,7 +12,7 @@ if [ $(whoami) == 'root' ] && [ $DEV_UID ]; then
 fi
 
 if [ "$1" ]; then
-	sudo -Eu $USER $@
+	sudo -HEu $USER $@
 else
 	echo "starting bash"
 	/bin/bash
