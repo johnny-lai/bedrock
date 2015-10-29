@@ -35,7 +35,7 @@ func ReadConfig(yamlPath string, config interface{}) error {
 
 func NewApp(svc AppServicer) *cli.App {
   app := cli.NewApp()
-  
+
   app.Flags = []cli.Flag{
     cli.StringFlag{
       Name:  "config, c",

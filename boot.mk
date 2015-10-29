@@ -41,7 +41,7 @@ clean:
 build: deps
 	GO15VENDOREXPERIMENT=1 go build \
 		-o $(BUILD_ROOT)/$(APP_NAME) \
-		-ldflags "-X main.version=$(VERSION) -X main.commit=$(COMMIT)" \
+		-ldflags "-X main.version=$(VERSION)-$(COMMIT)" \
 		$(APP_NAME).go
 
 deps: $(GLIDE) $(BUILD_ROOT)
@@ -80,6 +80,8 @@ devconsole:
 	           -v /var/run/docker.sock:/var/run/docker.sock \
 	           -v $(SRCROOT):$(SRCROOT_D) \
 	           -w $(SRCROOT_D) \
+	           -e DEV_UID=`id -u` \
+	           -e DEV_GID=`id -g` \
 	           -e GO15VENDOREXPERIMENT=1 \
 	           -it \
 	           $(DOCKER_DEVIMAGE)
@@ -138,7 +140,7 @@ $(PRODUCT_PATH): $(wildcard *.go)
 	           -w $(SRCROOT_D) \
 	           -e BUILD_ROOT=$(BUILD_ROOT_D) \
 	           -e BUILD_NUMBER=$(BUILD_NUMBER) \
-	           -e UID=`id -u` \
-	           -e GID=`id -g` \
+	           -e DEV_UID=`id -u` \
+	           -e DEV_GID=`id -g` \
 	           $(DOCKER_DEVIMAGE) \
 	           make distbuild
