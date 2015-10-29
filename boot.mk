@@ -7,6 +7,8 @@ COMMIT ?= $(shell git log --pretty=format:'%h' -n 1)
 VERSION = $(MAJOR_VERSION).$(MINOR_VERSION).$(BUILD_NUMBER)
 
 DOCKER_DEVIMAGE ?= johnnylai/golang-dev
+DOCKER_DEV_UID ?= $(shell which docker-machine &> /dev/null || id -u)
+DOCKER_DEV_GID ?= $(shell which docker-machine &> /dev/null || id -g)
 
 APP_ITEST_ENV_ROOT ?= $(SRCROOT)/itest/env
 
@@ -78,10 +80,12 @@ devconsole:
 	           --net=host \
 	           -v `which docker`:/bin/docker \
 	           -v /var/run/docker.sock:/var/run/docker.sock \
+	           -v /lib64/libdevmapper.so.1.02:/lib/libdevmapper.so.1.02 \
+	           -v /lib64/libudev.so.0:/lib/libudev.so.0 \
 	           -v $(SRCROOT):$(SRCROOT_D) \
 	           -w $(SRCROOT_D) \
-	           -e DEV_UID=`id -u` \
-	           -e DEV_GID=`id -g` \
+	           -e DEV_UID=$(DOCKER_DEV_UID) \
+	           -e DEV_GID=$(DOCKER_DEV_GID) \
 	           -e GO15VENDOREXPERIMENT=1 \
 	           -it \
 	           $(DOCKER_DEVIMAGE)
@@ -95,6 +99,8 @@ distitest:
 	docker run --rm --net=host \
 	           -v $(SRCROOT):$(SRCROOT_D) \
  	           -w $(SRCROOT_D) \
+	           -e DEV_UID=$(DOCKER_DEV_UID) \
+	           -e DEV_GID=$(DOCKER_DEV_GID) \
 	           $(DOCKER_DEVIMAGE) \
 	           make itest
 
@@ -102,6 +108,8 @@ distibench:
 	docker run --rm --net=host \
 	           -v $(SRCROOT):$(SRCROOT_D) \
  	           -w $(SRCROOT_D)/itest \
+	           -e DEV_UID=$(DOCKER_DEV_UID) \
+	           -e DEV_GID=$(DOCKER_DEV_GID) \
 	           $(DOCKER_DEVIMAGE) \
 	           make bench
 
@@ -112,6 +120,8 @@ distutest:
 	           --link $(APP_NAME)-testdb:$(APP_NAME)-db \
 	           -v $(SRCROOT):$(SRCROOT_D) \
 	           -w $(SRCROOT_D) \
+	           -e DEV_UID=$(DOCKER_DEV_UID) \
+	           -e DEV_GID=$(DOCKER_DEV_GID) \
 	           -e DB_ENV_MYSQL_ROOT_PASSWORD=whatever \
 	           -e TEST_CONFIG_YML=$(TEST_CONFIG_YML_D) \
 	           $(DOCKER_DEVIMAGE) \
@@ -140,7 +150,7 @@ $(PRODUCT_PATH): $(wildcard *.go)
 	           -w $(SRCROOT_D) \
 	           -e BUILD_ROOT=$(BUILD_ROOT_D) \
 	           -e BUILD_NUMBER=$(BUILD_NUMBER) \
-	           -e DEV_UID=`id -u` \
-	           -e DEV_GID=`id -g` \
+	           -e DEV_UID=$(DOCKER_DEV_UID) \
+	           -e DEV_GID=$(DOCKER_DEV_GID) \
 	           $(DOCKER_DEVIMAGE) \
 	           make distbuild
