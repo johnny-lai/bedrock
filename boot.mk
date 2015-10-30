@@ -10,6 +10,7 @@ DOCKER_DEVIMAGE ?= johnnylai/bedrock-dev:59428d3
 DOCKER_DEV_UID ?= $(shell which docker-machine &> /dev/null || id -u)
 DOCKER_DEV_GID ?= $(shell which docker-machine &> /dev/null || id -g)
 
+APP_DOCKER_PUSH ?= yes
 APP_ITEST_ENV_ROOT ?= $(SRCROOT)/itest/env
 
 # These are local paths
@@ -141,7 +142,7 @@ distutest.run:
 
 #-------------------------------------------------------------------------------
 deploy: image-testdb distutest image-dist distitest
-	docker push $(APP_DOCKER_LABEL)
+	if [ "$(APP_DOCKER_PUSH)" == "yes" ]; then docker push $(APP_DOCKER_LABEL); fi
 
 .PHONY: build clean default deploy deps dist distbuild fmt migrate itest utest
 
