@@ -10,6 +10,7 @@ DOCKER_DEVIMAGE ?= johnnylai/bedrock-dev:59428d3
 DOCKER_DEV_UID ?= $(shell which docker-machine &> /dev/null || id -u)
 DOCKER_DEV_GID ?= $(shell which docker-machine &> /dev/null || id -g)
 
+APP_GO_SOURCES ?= $(APP_NAME).go
 APP_DOCKER_PUSH ?= yes
 APP_ITEST_ENV_ROOT ?= $(SRCROOT)/itest/env
 
@@ -45,7 +46,7 @@ build: deps
 	GO15VENDOREXPERIMENT=1 go build \
 		-o $(BUILD_ROOT)/$(APP_NAME) \
 		-ldflags "-X main.version=$(VERSION)-$(COMMIT)" \
-		$(APP_NAME).go service.go
+		$(APP_GO_SOURCES)
 
 deps: $(GLIDE) $(BUILD_ROOT)
 	if [ ! -d vendor/github.com/gin-gonic/gin ]; then $(GLIDE) update; fi
