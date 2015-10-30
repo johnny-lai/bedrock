@@ -140,7 +140,7 @@ distutest.run:
 	           make utest
 
 #-------------------------------------------------------------------------------
-deploy: distutest dist distitest
+deploy: image-testdb distutest image-dist distitest
 	docker push $(APP_DOCKER_LABEL)
 
 .PHONY: build clean default deploy deps dist distbuild fmt migrate itest utest
