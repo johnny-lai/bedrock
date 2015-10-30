@@ -6,7 +6,7 @@ BUILD_NUMBER ?= 0
 COMMIT ?= $(shell git log --pretty=format:'%h' -n 1)
 VERSION = $(MAJOR_VERSION).$(MINOR_VERSION).$(BUILD_NUMBER)
 
-DOCKER_DEVIMAGE ?= johnnylai/bedrock-dev:275ad78
+DOCKER_DEVIMAGE ?= johnnylai/bedrock-dev:59428d3
 DOCKER_DEV_UID ?= $(shell which docker-machine &> /dev/null || id -u)
 DOCKER_DEV_GID ?= $(shell which docker-machine &> /dev/null || id -g)
 
@@ -25,8 +25,8 @@ BUILD_ROOT_D = $(SRCROOT_D)/tmp/dist
 TEST_CONFIG_YML_D = $(SRCROOT_D)/config/production.yml
 
 #
-SERVER ?= $(shell kubectl get svc go-service-basic -o json | jq -r '.spec.clusterIP')
-PORT ?= $(shell kubectl get svc go-service-basic -o json | jq '.spec.ports[0].targetPort')
+SERVER ?= $(shell kubectl get svc $(APP_NAME) -o json | jq -r '.spec.clusterIP')
+PORT ?= $(shell kubectl get svc $(APP_NAME) -o json | jq '.spec.ports[0].targetPort')
 
 # For itest
 RUN_IN_DEV = docker run --rm --net=host -i $(DOCKER_DEVIMAGE)
@@ -44,7 +44,7 @@ build: deps
 	GO15VENDOREXPERIMENT=1 go build \
 		-o $(BUILD_ROOT)/$(APP_NAME) \
 		-ldflags "-X main.version=$(VERSION)-$(COMMIT)" \
-		$(APP_NAME).go
+		$(APP_NAME).go service.go
 
 deps: $(GLIDE) $(BUILD_ROOT)
 	if [ ! -d vendor/github.com/gin-gonic/gin ]; then $(GLIDE) update; fi
@@ -65,7 +65,7 @@ itest.env.start:
 	for n in $(APP_ITEST_ENV_ROOT)/*.yml; do \
 		cat $$n | $(KUBECTL) create -f - ; \
 	done
-	$(RUN_IN_DEV) wait-for-pod.sh go-service-basic
+	$(RUN_IN_DEV) wait-for-pod.sh $(APP_NAME)
 
 itest.env.stop:
 	-docker run --rm -i --net=host $(DOCKER_DEVIMAGE) kubectl delete all -lapp=$(APP_NAME)
@@ -114,7 +114,7 @@ distibench.env: itest.env.stop itest.env.start
 distibench.run:
 	docker run --rm --net=host \
 	           -v $(SRCROOT):$(SRCROOT_D) \
- 	           -w $(SRCROOT_D)/itest \
+ 	           -w $(SRCROOT_D) \
 	           -e DEV_UID=$(DOCKER_DEV_UID) \
 	           -e DEV_GID=$(DOCKER_DEV_GID) \
 	           $(DOCKER_DEVIMAGE) \
