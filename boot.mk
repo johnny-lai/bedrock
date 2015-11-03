@@ -64,13 +64,14 @@ bench:
 	TEST_HOST="http://$(SERVER):$(PORT)" go test -bench=. $(APP_NAME)/itest
 
 itest.env.start:
-	for n in $(APP_ITEST_ENV_ROOT)/*.yml; do \
+	for n in $(APP_ITEST_ENV_ROOT)/*-secrets.yml $(APP_ITEST_ENV_ROOT)/*-controller.yml $(APP_ITEST_ENV_ROOT)/*-service.yml; do \
 		cat $$n | $(KUBECTL) create -f - ; \
 	done
 	$(RUN_IN_DEV) wait-for-pod.sh $(APP_NAME)
 
 itest.env.stop:
 	-docker run --rm -i --net=host $(DOCKER_DEVIMAGE) kubectl delete all -lapp=$(APP_NAME)
+	-docker run --rm -i --net=host $(DOCKER_DEVIMAGE) kubectl delete secrets -lapp=$(APP_NAME)
 
 fmt:
 	GO15VENDOREXPERIMENT=1 go fmt $(APP_GO_PACKAGES)
