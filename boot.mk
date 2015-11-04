@@ -15,7 +15,7 @@ APP_DOCKER_PUSH ?= yes
 APP_ITEST_ENV_ROOT ?= $(SRCROOT)/itest/env
 
 # These are local paths
-SRCROOT ?= $(realpath .)
+SRCROOT ?= $(abspath .)
 BUILD_ROOT ?= $(SRCROOT)
 DOCKER_ROOT ?= $(SRCROOT)/docker
 TEST_CONFIG_YML ?= $(SRCROOT)/config/test.yml
@@ -27,12 +27,9 @@ BUILD_ROOT_D = $(SRCROOT_D)/tmp/dist
 TEST_CONFIG_YML_D = $(SRCROOT_D)/config/production.yml
 
 #
-SERVER ?= $(shell kubectl get svc $(APP_NAME) -o json | jq -r '.spec.clusterIP')
+SERVER ?= $(shell kubectl get svc $(APP_NAME) -o json | jq -r '.status.loadBalancer.ingress[0].ip')
 PORT ?= $(shell kubectl get svc $(APP_NAME) -o json | jq '.spec.ports[0].targetPort')
 
-# For itest
-RUN_IN_DEV = docker run --rm --net=host -i $(DOCKER_DEVIMAGE)
-KUBECTL = $(RUN_IN_DEV) kubectl
 
 default: build
 
@@ -57,22 +54,6 @@ migrate:
 utest: deps
 	TEST_CONFIG_YML=$(TEST_CONFIG_YML) GO15VENDOREXPERIMENT=1 go test $(APP_GO_PACKAGES)
 
-itest:
-	TEST_HOST="http://$(SERVER):$(PORT)" go test $(APP_NAME)/itest
-
-bench:
-	TEST_HOST="http://$(SERVER):$(PORT)" go test -bench=. $(APP_NAME)/itest
-
-itest.env.start:
-	for n in $(APP_ITEST_ENV_ROOT)/*-secrets.yml $(APP_ITEST_ENV_ROOT)/*-controller.yml $(APP_ITEST_ENV_ROOT)/*-service.yml; do \
-		cat $$n | $(KUBECTL) create -f - ; \
-	done
-	$(RUN_IN_DEV) wait-for-pod.sh $(APP_NAME)
-
-itest.env.stop:
-	-docker run --rm -i --net=host $(DOCKER_DEVIMAGE) kubectl delete all -lapp=$(APP_NAME)
-	-docker run --rm -i --net=host $(DOCKER_DEVIMAGE) kubectl delete secrets -lapp=$(APP_NAME)
-
 fmt:
 	GO15VENDOREXPERIMENT=1 go fmt $(APP_GO_PACKAGES)
 
@@ -96,9 +77,40 @@ dist: image-dist image-testdb
 distbuild: $(PRODUCT_PATH)
 
 #-------------------------------------------------------------------------------
-distitest: distitest.env distitest.run
+itest: itest.env itest.run
 
-distitest.env: itest.env.stop itest.env.start
+itest.run:
+	TEST_HOST="http://$(SERVER):$(PORT)" go test $(APP_NAME)/itest
+
+itest.env: itest.env.stop itest.env.start
+
+itest.env.start:
+	for n in $(APP_ITEST_ENV_ROOT)/*-secrets.yml $(APP_ITEST_ENV_ROOT)/*-controller.yml $(APP_ITEST_ENV_ROOT)/*-service.yml; do \
+		cat $$n | kubectl create -f - ; \
+	done
+	-wait-for-pod.sh $(APP_NAME)
+
+itest.env.stop:
+	-kubectl delete all -lapp=$(APP_NAME)
+	-kubectl delete secrets -lapp=$(APP_NAME)
+
+distitest:
+	docker run --rm --net=host \
+	           -v $(SRCROOT):$(SRCROOT_D) \
+ 	           -w $(SRCROOT_D) \
+	           -e DEV_UID=$(DOCKER_DEV_UID) \
+	           -e DEV_GID=$(DOCKER_DEV_GID) \
+	           $(DOCKER_DEVIMAGE) \
+						 make itest
+
+distitest.env:
+	docker run --rm --net=host \
+	           -v $(SRCROOT):$(SRCROOT_D) \
+ 	           -w $(SRCROOT_D) \
+	           -e DEV_UID=$(DOCKER_DEV_UID) \
+	           -e DEV_GID=$(DOCKER_DEV_GID) \
+	           $(DOCKER_DEVIMAGE) \
+						 make itest.env
 
 distitest.run:
 	docker run --rm --net=host \
@@ -107,12 +119,19 @@ distitest.run:
 	           -e DEV_UID=$(DOCKER_DEV_UID) \
 	           -e DEV_GID=$(DOCKER_DEV_GID) \
 	           $(DOCKER_DEVIMAGE) \
-	           make itest
+	           make itest.run
 
 #-------------------------------------------------------------------------------
+ibench: ibench.env ibench.run
+
+ibench.run:
+	TEST_HOST="http://$(SERVER):$(PORT)" go test -bench=. $(APP_NAME)/itest
+
+ibench.env: itest.env
+
 distibench: distibench.env distibench.run
 
-distibench.env: itest.env.stop itest.env.start
+distibench.env: distitest.env
 
 distibench.run:
 	docker run --rm --net=host \
@@ -121,7 +140,7 @@ distibench.run:
 	           -e DEV_UID=$(DOCKER_DEV_UID) \
 	           -e DEV_GID=$(DOCKER_DEV_GID) \
 	           $(DOCKER_DEVIMAGE) \
-	           make bench
+	           make ibench.run
 
 #-------------------------------------------------------------------------------
 distutest: distutest.env distutest.run
