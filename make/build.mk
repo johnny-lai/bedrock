@@ -1,5 +1,12 @@
 BUILD_ROOT ?= $(SRCROOT)
 
+APP_DOCKER_LABEL_VERSION = $(APP_DOCKER_LABEL):$(MAJOR_VERSION).$(MINOR_VERSION)
+APP_DOCKER_LABEL_COMMIT = $(APP_DOCKER_LABEL):$(COMMIT)
+
+TESTDB_DOCKER_LABEL ?= $(APP_DOCKER_LABEL)-testdb
+TESTDB_DOCKER_LABEL_VERSION = $(TESTDB_DOCKER_LABEL):$(MAJOR_VERSION).$(MINOR_VERSION)
+TESTDB_DOCKER_LABEL_COMMIT = $(TESTDB_DOCKER_LABEL):$(COMMIT)
+
 # GO flags
 ifeq ($(APP_GO_LINKING), static)
 	GO_ENV ?= GO15VENDOREXPERIMENT=1 CGO_ENABLED=0
@@ -25,12 +32,33 @@ dist: image-dist image-testdb
 
 distbuild: $(PRODUCT_PATH)
 
+distpush: image-dist.push image-testdb.push
+
+deploy: image-testdb distutest image-dist distitest distpush
+
 image-testdb:
-	docker build -f $(DOCKER_ROOT)/testdb/Dockerfile -t $(APP_DOCKER_LABEL)-testdb .
+	docker build -f $(DOCKER_ROOT)/testdb/Dockerfile -t $(TESTDB_DOCKER_LABEL_COMMIT) $(SRCROOT)
+	docker tag -f $(TESTDB_DOCKER_LABEL_COMMIT) $(TESTDB_DOCKER_LABEL)
+	docker tag -f $(TESTDB_DOCKER_LABEL_COMMIT) $(TESTDB_DOCKER_LABEL_VERSION)
+
+image-testdb.push:
+	if [ "$(APP_DOCKER_PUSH)" == "yes" ]; then \
+		docker push $(TESTDB_DOCKER_LABEL); \
+		docker push $(TESTDB_DOCKER_LABEL_VERSION); \
+		docker push $(TESTDB_DOCKER_LABEL_COMMIT); \
+	fi
 
 image-dist: distbuild
-	docker build -f $(DOCKER_ROOT)/dist/Dockerfile -t $(APP_DOCKER_LABEL) .
+	docker build -f $(DOCKER_ROOT)/dist/Dockerfile -t $(APP_DOCKER_LABEL_COMMIT) $(SRCROOT)
+	docker tag -f $(APP_DOCKER_LABEL_COMMIT) $(APP_DOCKER_LABEL)
+	docker tag -f $(APP_DOCKER_LABEL_COMMIT) $(APP_DOCKER_LABEL_VERSION)
 
+image-dist.push:
+	if [ "$(APP_DOCKER_PUSH)" == "yes" ]; then \
+		docker push $(APP_DOCKER_LABEL); \
+		docker push $(APP_DOCKER_LABEL_VERSION); \
+		docker push $(APP_DOCKER_LABEL_COMMIT); \
+	fi
 
 $(PRODUCT_PATH): $(wildcard *.go)
 	docker run --rm \
@@ -43,5 +71,4 @@ $(PRODUCT_PATH): $(wildcard *.go)
 	           $(DOCKER_DEVIMAGE) \
 	           make build
 
-deploy: image-testdb distutest image-dist distitest
-	if [ "$(APP_DOCKER_PUSH)" == "yes" ]; then docker push $(APP_DOCKER_LABEL); fi
+

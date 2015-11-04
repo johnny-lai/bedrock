@@ -10,10 +10,12 @@ DOCKER_DEVIMAGE ?= johnnylai/bedrock-dev:6890306
 DOCKER_DEV_UID ?= $(shell which docker-machine &> /dev/null || id -u)
 DOCKER_DEV_GID ?= $(shell which docker-machine &> /dev/null || id -g)
 
+APP_DOCKER_LABEL ?= unset
 APP_GO_LINKING ?= dynamic
 APP_GO_SOURCES ?= $(APP_NAME).go
 APP_DOCKER_PUSH ?= yes
 APP_ITEST_ENV_ROOT ?= $(SRCROOT)/itest/env
+
 
 
 # These are local paths
