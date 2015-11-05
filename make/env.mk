@@ -8,7 +8,7 @@ VERSION = $(MAJOR_VERSION).$(MINOR_VERSION).$(BUILD_NUMBER)
 
 KUBERNETES_CONFIG ?= $(BEDROCK_ROOT)/make/kubernetes.config.default
 
-DOCKER_DEVIMAGE ?= johnnylai/bedrock-dev
+DOCKER_DEVIMAGE ?= johnnylai/bedrock-dev:17cbf55
 DOCKER_DEV_UID ?= $(shell which docker-machine &> /dev/null || id -u)
 DOCKER_DEV_GID ?= $(shell which docker-machine &> /dev/null || id -g)
 DOCKER_OPTS ?= -v $(SRCROOT):$(SRCROOT_D) \
