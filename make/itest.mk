@@ -17,27 +17,18 @@ itest.env.stop:
 
 distitest:
 	docker run --rm --net=host \
-	           -v $(SRCROOT):$(SRCROOT_D) \
- 	           -w $(SRCROOT_D) \
-	           -e DEV_UID=$(DOCKER_DEV_UID) \
-	           -e DEV_GID=$(DOCKER_DEV_GID) \
+	           $(DOCKER_OPTS) \
 	           $(DOCKER_DEVIMAGE) \
 						 make itest
 
 distitest.env:
 	docker run --rm --net=host \
-	           -v $(SRCROOT):$(SRCROOT_D) \
- 	           -w $(SRCROOT_D) \
-	           -e DEV_UID=$(DOCKER_DEV_UID) \
-	           -e DEV_GID=$(DOCKER_DEV_GID) \
+	           $(DOCKER_OPTS) \
 	           $(DOCKER_DEVIMAGE) \
 						 make itest.env
 
 distitest.run:
 	docker run --rm --net=host \
-	           -v $(SRCROOT):$(SRCROOT_D) \
- 	           -w $(SRCROOT_D) \
-	           -e DEV_UID=$(DOCKER_DEV_UID) \
-	           -e DEV_GID=$(DOCKER_DEV_GID) \
+	           $(DOCKER_OPTS) \
 	           $(DOCKER_DEVIMAGE) \
 	           make itest.run

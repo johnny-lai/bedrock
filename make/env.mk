@@ -6,9 +6,17 @@ BUILD_NUMBER ?= 0
 COMMIT ?= $(shell git log --pretty=format:'%h' -n 1)
 VERSION = $(MAJOR_VERSION).$(MINOR_VERSION).$(BUILD_NUMBER)
 
-DOCKER_DEVIMAGE ?= johnnylai/bedrock-dev:6890306
+KUBERNETES_CONFIG ?= $(BEDROCK_ROOT)/make/kubernetes.config.default
+
+DOCKER_DEVIMAGE ?= johnnylai/bedrock-dev
 DOCKER_DEV_UID ?= $(shell which docker-machine &> /dev/null || id -u)
 DOCKER_DEV_GID ?= $(shell which docker-machine &> /dev/null || id -g)
+DOCKER_OPTS ?= -v $(SRCROOT):$(SRCROOT_D) \
+               -v $(KUBERNETES_CONFIG):/home/dev/.kube/config \
+               -v $(KUBERNETES_CONFIG):/root/.kube/config \
+               -w $(SRCROOT_D) \
+               -e DEV_UID=$(DOCKER_DEV_UID) \
+               -e DEV_GID=$(DOCKER_DEV_GID)
 
 APP_DOCKER_LABEL ?= unset
 APP_GO_LINKING ?= dynamic
