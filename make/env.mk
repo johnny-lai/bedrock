@@ -8,6 +8,12 @@ VERSION = $(MAJOR_VERSION).$(MINOR_VERSION).$(BUILD_NUMBER)
 
 KUBERNETES_CONFIG ?= $(BEDROCK_ROOT)/make/kubernetes.config.default
 
+APP_DOCKER_LABEL ?= unset
+APP_GO_LINKING ?= dynamic
+APP_GO_SOURCES ?= $(APP_NAME).go
+APP_DOCKER_PUSH ?= yes
+APP_ITEST_ENV_ROOT ?= $(SRCROOT)/itest/env
+
 DOCKER_DEVIMAGE ?= johnnylai/bedrock-dev:17cbf55
 DOCKER_DEV_UID ?= $(shell which docker-machine &> /dev/null || id -u)
 DOCKER_DEV_GID ?= $(shell which docker-machine &> /dev/null || id -g)
@@ -17,12 +23,11 @@ DOCKER_OPTS ?= -v $(SRCROOT):$(SRCROOT_D) \
                -w $(SRCROOT_D) \
                -e DEV_UID=$(DOCKER_DEV_UID) \
                -e DEV_GID=$(DOCKER_DEV_GID)
-
-APP_DOCKER_LABEL ?= unset
-APP_GO_LINKING ?= dynamic
-APP_GO_SOURCES ?= $(APP_NAME).go
-APP_DOCKER_PUSH ?= yes
-APP_ITEST_ENV_ROOT ?= $(SRCROOT)/itest/env
+ifneq ($(findstring gcr.io/,$(APP_DOCKER_LABEL)),)
+	DOCKER_PUSH ?= gcloud docker push
+else
+	DOCKER_PUSH ?= docker push
+endif
 
 
 

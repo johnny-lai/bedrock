@@ -43,9 +43,9 @@ image-testdb:
 
 image-testdb.push:
 	if [ "$(APP_DOCKER_PUSH)" == "yes" ]; then \
-		docker push $(TESTDB_DOCKER_LABEL); \
-		docker push $(TESTDB_DOCKER_LABEL_VERSION); \
-		docker push $(TESTDB_DOCKER_LABEL_COMMIT); \
+		$(DOCKER_PUSH) $(TESTDB_DOCKER_LABEL); \
+		$(DOCKER_PUSH) $(TESTDB_DOCKER_LABEL_VERSION); \
+		$(DOCKER_PUSH) $(TESTDB_DOCKER_LABEL_COMMIT); \
 	fi
 
 image-dist: distbuild
@@ -55,9 +55,9 @@ image-dist: distbuild
 
 image-dist.push:
 	if [ "$(APP_DOCKER_PUSH)" == "yes" ]; then \
-		docker push $(APP_DOCKER_LABEL); \
-		docker push $(APP_DOCKER_LABEL_VERSION); \
-		docker push $(APP_DOCKER_LABEL_COMMIT); \
+		$(DOCKER_PUSH) $(APP_DOCKER_LABEL); \
+		$(DOCKER_PUSH) $(APP_DOCKER_LABEL_VERSION); \
+		$(DOCKER_PUSH) $(APP_DOCKER_LABEL_COMMIT); \
 	fi
 
 $(PRODUCT_PATH): $(wildcard *.go)
