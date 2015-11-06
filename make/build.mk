@@ -27,7 +27,7 @@ distbuild: $(PRODUCT_PATH)
 
 distpush: image-dist.push image-testdb.push
 
-deploy: image-testdb distutest image-dist distitest distpush
+deploy: image-testdb distutest image-dist distpush distitest
 
 image-testdb:
 	docker build -f $(DOCKER_ROOT)/testdb/Dockerfile -t $(TESTDB_DOCKER_LABEL_COMMIT) $(SRCROOT)
@@ -35,7 +35,7 @@ image-testdb:
 	docker tag -f $(TESTDB_DOCKER_LABEL_COMMIT) $(TESTDB_DOCKER_LABEL_VERSION)
 
 image-testdb.push:
-	if [ "$(APP_DOCKER_PUSH)" == "yes" ]; then \
+	if [ "$(APP_DOCKER_PUSH)" != "no" ]; then \
 		$(DOCKER_PUSH) $(TESTDB_DOCKER_LABEL); \
 		$(DOCKER_PUSH) $(TESTDB_DOCKER_LABEL_VERSION); \
 		$(DOCKER_PUSH) $(TESTDB_DOCKER_LABEL_COMMIT); \
@@ -47,7 +47,7 @@ image-dist: distbuild
 	docker tag -f $(APP_DOCKER_LABEL_COMMIT) $(APP_DOCKER_LABEL_VERSION)
 
 image-dist.push:
-	if [ "$(APP_DOCKER_PUSH)" == "yes" ]; then \
+	if [ "$(APP_DOCKER_PUSH)" != "no" ]; then \
 		$(DOCKER_PUSH) $(APP_DOCKER_LABEL); \
 		$(DOCKER_PUSH) $(APP_DOCKER_LABEL_VERSION); \
 		$(DOCKER_PUSH) $(APP_DOCKER_LABEL_COMMIT); \
