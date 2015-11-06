@@ -2,7 +2,6 @@ package bedrock
 
 import (
   "errors"
-  "fmt"
   "github.com/codegangsta/cli"
   "github.com/gin-gonic/gin"
   "github.com/johnny-lai/yaml"
@@ -12,31 +11,62 @@ import (
 )
 
 type AppServicer interface {
-  Config() interface{}
-  Migrate() error
-  Build(r *gin.Engine) error
-  Run(r *gin.Engine) error
+  Configure(*Application) error
+  Migrate(*Application) error
+  Build(*Application) error
+  Run(*Application) error
 }
 
-func ReadConfig(yamlPath string, config interface{}) error {
-  if _, err := os.Stat(yamlPath); err != nil {
+type Application struct {
+  cli.App
+
+  configBytes []byte
+
+  Servicer AppServicer
+  Engine *gin.Engine
+  
+  Log func()
+}
+
+func (self *Application) ReadConfigFile(file string) error {
+  if _, err := os.Stat(file); err != nil {
     return errors.New("config path not valid")
   }
 
-  ymlData, err := ioutil.ReadFile(yamlPath)
+  configBytes, err := ioutil.ReadFile(file)
   if err != nil {
     return err
   }
 
-  err = yaml.Unmarshal([]byte(ymlData), config)
-
-  return err
+  self.configBytes = configBytes
+  return nil
 }
 
-func NewApp(svc AppServicer) *cli.App {
-  app := cli.NewApp()
+func (self *Application) BindConfig(config interface{}) error {
+  return yaml.Unmarshal(self.configBytes, config)
+}
 
-  app.Flags = []cli.Flag{
+func (self *Application) Error(message string, err error, c *gin.Context, printStack bool, sendAirbrake bool) {
+/*
+	w := gin.DefaultWriter
+	w.Write([]byte(fmt.Sprintf("%s error:%v", message, err)))
+	if printStack {
+		trace := make([]byte, maxStackTraceSize)
+		runtime.Stack(trace, false)
+		w.Write([]byte(fmt.Sprintf("stack trace--\n%s\n--", trace)))
+	}
+	if sendAirbrake {
+		airbrake.Notify(fmt.Errorf("%s error:%v", message, err), c.Request)
+		defer airbrake.Flush()
+	}
+	c.AbortWithError(http.StatusInternalServerError, err)*/
+}
+
+func (self *Application) initCli() {
+  svc := self.Servicer
+
+  self.App = *cli.NewApp()
+  self.App.Flags = []cli.Flag{
     cli.StringFlag{
       Name:  "config, c",
       Value: "config.yaml",
@@ -44,58 +74,61 @@ func NewApp(svc AppServicer) *cli.App {
     },
   }
 
-  app.Commands = []cli.Command{
+  self.App.Commands = []cli.Command{
     {
       Name:  "env",
       Usage: "Print the configurations",
       Action: func(c *cli.Context) {
-        err := ReadConfig(c.GlobalString("config"), svc.Config())
-        if err != nil {
+        if err := self.ReadConfigFile(c.GlobalString("config")); err != nil {
           log.Fatal(err)
           return
         }
-
+/*
         d, err := yaml.Marshal(svc.Config())
         if err != nil {
           log.Fatalf("error: %v", err)
         }
-        fmt.Printf(string(d))
+        fmt.Printf(string(d))*/
       },
     },
     {
       Name:  "server",
       Usage: "Run the http server",
       Action: func(c *cli.Context) {
-        err := ReadConfig(c.GlobalString("config"), svc.Config())
-        if err != nil {
+        if err := self.ReadConfigFile(c.GlobalString("config")); err != nil {
           log.Fatal(err)
           return
         }
 
-        r := gin.Default()
-        if err = svc.Build(r); err != nil {
+        if err := svc.Configure(self); err != nil {
           log.Fatal(err)
         }
 
-        svc.Run(r)
+        if err := svc.Build(self); err != nil {
+          log.Fatal(err)
+        }
+
+        svc.Run(self)
       },
     },
     {
       Name:  "migrate",
       Usage: "Perform database migrations",
       Action: func(c *cli.Context) {
-        err := ReadConfig(c.GlobalString("config"), svc.Config())
-        if err != nil {
-          log.Fatal(err)
-          return
-        }
-
-        if err = svc.Migrate(); err != nil {
+        if err := svc.Migrate(self); err != nil {
           log.Fatal(err)
         }
       },
     },
   }
+}
+
+func NewApp(svc AppServicer) *Application {
+  app := new(Application)
+
+  app.initCli()
+  app.Servicer = svc
+  app.Engine = gin.Default()
 
   return app
 }

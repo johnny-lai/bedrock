@@ -1,6 +1,7 @@
 package main
 
 import (
+  "bufio"
   "fmt"
   "github.com/johnny-lai/bedrock"
   "github.com/johnny-lai/yaml"
@@ -10,6 +11,9 @@ import (
 )
 
 var version = "unset"
+
+func ExpandFile(file string) {
+}
 
 func main() {
   app := cli.NewApp()

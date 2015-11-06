@@ -14,7 +14,7 @@ APP_DOCKER_LABEL ?= unset
 APP_GO_LINKING ?= dynamic
 APP_GO_SOURCES ?= $(APP_NAME).go
 APP_DOCKER_PUSH ?= yes
-APP_ITEST_ENV_ROOT ?= $(SRCROOT)/itest/env
+APP_ITEST_ENV_ROOT ?= $(BEDROCK_ROOT)/make/itest/env
 
 DOCKER_DEVIMAGE ?= johnnylai/bedrock-dev:17cbf55
 DOCKER_DEV_UID ?= $(shell which docker-machine &> /dev/null || id -u)
