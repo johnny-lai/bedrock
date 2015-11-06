@@ -1,7 +1,7 @@
 ibench: ibench.env ibench.run
 
 ibench.run:
-	TEST_HOST="http://$(SERVER):$(PORT)" go test -bench=. $(APP_NAME)/itest
+	TEST_HOST="http://$(CLUSTER_SERVER):$(CLUSTER_PORT)" go test -bench=. $(APP_NAME)/itest
 
 ibench.env: itest.env
 
