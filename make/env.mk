@@ -59,7 +59,7 @@ $(GLIDE):
 	go get github.com/Masterminds/glide
 
 $(BEDROCK): $(BEDROCK_ROOT)/cli/*.go
-	go build -o $(BEDROCK) $(BEDROCK_ROOT)/cli/bedrock.go
+	GO15VENDOREXPERIMENT=1 go build -o $(BEDROCK) $(BEDROCK_ROOT)/cli/bedrock.go
 
 $(BUILD_ROOT):
 	mkdir -p $@
