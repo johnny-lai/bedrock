@@ -1,15 +1,41 @@
+KUBE_SECRETS = $(wildcard $(APP_ITEST_ENV_ROOT)/*-secret.yml)
+KUBE_CONTROLLERS = $(wildcard $(APP_ITEST_ENV_ROOT)/*-controller.yml)
+KUBE_SERVICES = $(wildcard $(APP_ITEST_ENV_ROOT)/*-service.yml)
+
+export APP_NAME
+
+export PO_APP_NAME = $(APP_NAME)
+export PO_APP_IMAGE = $(APP_DOCKER_LABEL_COMMIT)
+export SVC_APP_NAME = $(PO_APP_NAME)
+
+export PO_DB_NAME = $(APP_NAME)-db
+export PO_DB_IMAGE = $(TESTDB_DOCKER_LABEL_COMMIT)
+export SVC_DB_NAME = $(PO_DB_NAME)
+
+export SECRET_DB_NAME = $(APP_NAME)-db-secret
+
+#
+CLUSTER_SERVER ?= $(shell kubectl get svc $(SVC_APP_NAME) -o json | jq -r '.status.loadBalancer.ingress[0].ip')
+CLUSTER_PORT ?= $(shell kubectl get svc $(SVC_APP_NAME) -o json | jq '.spec.ports[0].targetPort')
+
 itest: itest.env itest.run
 
 itest.run:
-	TEST_HOST="http://$(SERVER):$(PORT)" go test $(APP_NAME)/itest
+	TEST_HOST="http://$(CLUSTER_SERVER):$(CLUSTER_PORT)" go test $(APP_NAME)/itest
 
 itest.env: itest.env.stop itest.env.start
 
-itest.env.start:
-	for n in $(APP_ITEST_ENV_ROOT)/*-secrets.yml $(APP_ITEST_ENV_ROOT)/*-controller.yml $(APP_ITEST_ENV_ROOT)/*-service.yml; do \
-		cat $$n | kubectl create -f - ; \
+itest.env.start: $(BEDROCK)
+	for n in $(KUBE_SECRETS); do \
+		$(BEDROCK) dump $$n | cat - | kubectl create -f - ; \
 	done
-	-wait-for-pod.sh $(APP_NAME)
+	for n in $(KUBE_CONTROLLERS); do \
+		$(BEDROCK) dump $$n | cat - | kubectl create -f - ; \
+	done
+	for n in $(KUBE_SERVICES); do \
+		$(BEDROCK) dump $$n | cat - | kubectl create -f - ; \
+	done
+	-wait-for-pod.sh $(SVC_APP_NAME)
 
 itest.env.stop:
 	-kubectl delete all -lapp=$(APP_NAME)

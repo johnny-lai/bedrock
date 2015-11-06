@@ -1,4 +1,5 @@
 GLIDE = $(GOPATH)/bin/glide
+BEDROCK = $(BEDROCK_ROOT)/bedrock
 
 MAJOR_VERSION ?= 0
 MINOR_VERSION ?= 0
@@ -8,6 +9,7 @@ VERSION = $(MAJOR_VERSION).$(MINOR_VERSION).$(BUILD_NUMBER)
 
 KUBERNETES_CONFIG ?= $(BEDROCK_ROOT)/make/kubernetes.config.default
 
+APP_NAME ?= unset
 APP_DOCKER_LABEL ?= unset
 APP_GO_LINKING ?= dynamic
 APP_GO_SOURCES ?= $(APP_NAME).go
@@ -29,7 +31,13 @@ else
 	DOCKER_PUSH ?= docker push
 endif
 
+# Docker Labels
+APP_DOCKER_LABEL_VERSION = $(APP_DOCKER_LABEL):$(MAJOR_VERSION).$(MINOR_VERSION)
+APP_DOCKER_LABEL_COMMIT = $(APP_DOCKER_LABEL):$(COMMIT)
 
+TESTDB_DOCKER_LABEL ?= $(APP_DOCKER_LABEL)-testdb
+TESTDB_DOCKER_LABEL_VERSION = $(TESTDB_DOCKER_LABEL):$(MAJOR_VERSION).$(MINOR_VERSION)
+TESTDB_DOCKER_LABEL_COMMIT = $(TESTDB_DOCKER_LABEL):$(COMMIT)
 
 # These are local paths
 SRCROOT ?= $(abspath .)
@@ -43,16 +51,15 @@ SRCROOT_D = /go/src/$(APP_NAME)
 BUILD_ROOT_D = $(SRCROOT_D)/tmp/dist
 TEST_CONFIG_YML_D = $(SRCROOT_D)/config/production.yml
 
-#
-SERVER ?= $(shell kubectl get svc $(APP_NAME) -o json | jq -r '.status.loadBalancer.ingress[0].ip')
-PORT ?= $(shell kubectl get svc $(APP_NAME) -o json | jq '.spec.ports[0].targetPort')
-
 
 deps: $(GLIDE) $(BUILD_ROOT)
 	if [ ! -d vendor/github.com/gin-gonic/gin ]; then $(GLIDE) update; fi
 
 $(GLIDE):
 	go get github.com/Masterminds/glide
+
+$(BEDROCK): $(BEDROCK_ROOT)/cli/*.go
+	cd $(BEDROCK_ROOT) && go build cli/bedrock.go
 
 $(BUILD_ROOT):
 	mkdir -p $@
