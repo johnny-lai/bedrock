@@ -26,7 +26,7 @@ type AppServicer interface {
 type Application struct {
 	cli.App
 
-	configBytes []byte
+	ConfigBytes []byte
 
 	Servicer AppServicer
 	Engine   *gin.Engine
@@ -60,12 +60,12 @@ func (app *Application) ReadConfigFile(file string) error {
 		return err
 	}
 
-	app.configBytes = configBytes.Bytes()
+	app.ConfigBytes = configBytes.Bytes()
 	return nil
 }
 
 func (app *Application) BindConfig(config interface{}) error {
-	return yaml.Unmarshal(app.configBytes, config)
+	return yaml.Unmarshal(app.ConfigBytes, config)
 }
 
 func (app *Application) BindConfigAt(config interface{}, key string) error {
