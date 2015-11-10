@@ -14,16 +14,16 @@ type AirbrakeConfig struct {
 }
 
 type AirbrakeService struct {
-	config   AirbrakeConfig
-	notifier *gobrake.Notifier
+	Config   AirbrakeConfig
+	Notifier *gobrake.Notifier
 }
 
 func (s *AirbrakeService) Configure(app *Application) error {
-	return app.BindConfigAt(&s.config, "airbrake")
+	return app.BindConfigAt(&s.Config, "airbrake")
 }
 
 func (s *AirbrakeService) Build(app *Application) error {
-	s.notifier = gobrake.NewNotifier(s.config.ProjectID, s.config.ProjectKey)
+	s.Notifier = gobrake.NewNotifier(s.Config.ProjectID, s.Config.ProjectKey)
 
 	app.Engine.Use(s.RecoveryHandler(app))
 	app.OnException = s.ExceptionHandler(app)
@@ -47,7 +47,7 @@ func (s *AirbrakeService) RecoveryHandler(app *Application) func(*gin.Context) {
 				app.OnException(c, err)
 				c.AbortWithError(http.StatusInternalServerError, err)
 			}
-			defer s.notifier.Flush()
+			defer s.Notifier.Flush()
 		}()
 		c.Next()
 	}
@@ -56,7 +56,7 @@ func (s *AirbrakeService) RecoveryHandler(app *Application) func(*gin.Context) {
 func (s *AirbrakeService) ExceptionHandler(app *Application) func(*gin.Context, error) {
 	return func(c *gin.Context, err error) {
 		app.LogException(c, err)
-		s.notifier.Notify(err, c.Request)
-		defer s.notifier.Flush()
+		s.Notifier.Notify(err, c.Request)
+		defer s.Notifier.Flush()
 	}
 }
