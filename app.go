@@ -79,7 +79,7 @@ func (app *Application) BindConfigAt(config interface{}, key string) error {
 		log.Fatal(err)
 		return err
 	}
-	fmt.Printf(string(d))
+	
 	return yaml.Unmarshal([]byte(d), config)
 }
 
