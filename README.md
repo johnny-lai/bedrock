@@ -21,7 +21,7 @@ to be installed.
 3. Add dependencies needed by bedrock into your `glide.yaml`.
 
    ```
-   - package: github.com/johnny-lai/yaml
+   - package: gopkg.in/yaml.v2
    - package: github.com/codegangsta/cli
    - package: github.com/gin-gonic/gin
    ```

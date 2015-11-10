@@ -7,10 +7,10 @@ import (
 )
 
 type DbConfig struct {
-	DbUser     string
-	DbPassword string
-	DbHost     string
-	DbName     string
+	User     string
+	Password string
+	Host     string
+	Database string
 }
 
 type GormService struct {
@@ -18,24 +18,25 @@ type GormService struct {
 }
 
 func (s *GormService) Db() (gorm.DB, error) {
-	connectionString := s.config.DbUser + ":" + s.config.DbPassword + "@tcp(" + s.config.DbHost + ":3306)/" + s.config.DbName + "?charset=utf8&parseTime=True"
+	connectionString := s.config.User + ":" + s.config.Password + "@tcp(" + s.config.Host + ":3306)/" + s.config.Database + "?charset=utf8&parseTime=True"
 
 	return gorm.Open("mysql", connectionString)
 }
 
 func (s *GormService) Configure(app *Application) error {
-	return app.BindConfig(&s.config)
+	return app.BindConfigAt(&s.config, "db")
 }
 
 func (s *GormService) HealthHandler(app *Application) func(*gin.Context) {
 	return func(c *gin.Context) {
 		db, _ := s.Db()
 
-		err := db.Exec("DO 1;")
+		err := db.Exec("DO 1;").Error
 		if err == nil {
 			c.JSON(http.StatusOK, gin.H{"status": "success"})
 		} else {
-			app.Error("Database execution", nil, c, true, true)
+			app.OnException(c, err)
+			c.AbortWithError(http.StatusInternalServerError, err)
 		}
 	}
 }

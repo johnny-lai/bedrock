@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"github.com/codegangsta/cli"
 	"github.com/johnny-lai/bedrock"
-	"github.com/johnny-lai/yaml"
 	"log"
 	"os"
+	"path"
+	"text/template"
 )
 
 var version = "unset"
@@ -21,25 +21,19 @@ func main() {
 			Name:  "dump",
 			Usage: "Reads the specified config file and prints the output",
 			Action: func(c *cli.Context) {
-				var config interface{}
+				file := c.Args().First()
 
-				app := new(bedrock.Application)
-
-				if err := app.ReadConfigFile(c.Args().First()); err != nil {
-					log.Fatal(err)
-					return
-				}
-
-				if err := app.BindConfig(&config); err != nil {
-					log.Fatal(err)
-					return
-				}
-
-				d, err := yaml.Marshal(config)
+				tmpl, err := template.New(path.Base(file)).ParseFiles(file)
 				if err != nil {
-					log.Fatalf("error: %v", err)
+					log.Fatal(err)
+					return
 				}
-				fmt.Printf(string(d))
+
+				tc := bedrock.TemplateContext{}
+				err = tmpl.Execute(os.Stdout, &tc)
+				if err != nil {
+					log.Fatal(err)
+				}
 			},
 		},
 	}
