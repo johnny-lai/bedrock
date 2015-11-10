@@ -7,7 +7,7 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v2"
-	"log"
+	log "github.com/Sirupsen/logrus"
 	"os"
 	"path"
 	"runtime"
@@ -32,7 +32,11 @@ type Application struct {
 	Engine   *gin.Engine
 
 	OnException func(*gin.Context, error)
-	Log func()
+}
+
+func init() {
+  // Log as JSON instead of the default ASCII formatter.
+  log.SetFormatter(&log.JSONFormatter{})
 }
 
 /*
