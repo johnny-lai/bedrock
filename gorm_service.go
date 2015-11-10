@@ -14,17 +14,21 @@ type DbConfig struct {
 }
 
 type GormService struct {
-	config DbConfig
+	Config DbConfig
 }
 
 func (s *GormService) Db() (gorm.DB, error) {
-	connectionString := s.config.User + ":" + s.config.Password + "@tcp(" + s.config.Host + ":3306)/" + s.config.Database + "?charset=utf8&parseTime=True"
+	connectionString := s.Config.User + ":" + s.Config.Password + "@tcp(" + s.Config.Host + ":3306)/" + s.Config.Database + "?charset=utf8&parseTime=True"
 
 	return gorm.Open("mysql", connectionString)
 }
 
 func (s *GormService) Configure(app *Application) error {
-	return app.BindConfigAt(&s.config, "db")
+	return app.BindConfigAt(&s.Config, "db")
+}
+
+func (s *GormService) Build(app *Application) error {
+	return nil
 }
 
 func (s *GormService) HealthHandler(app *Application) func(*gin.Context) {
