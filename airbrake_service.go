@@ -8,35 +8,48 @@ import (
 	"net/http"
 )
 
+// Airbrake Config
 type AirbrakeConfig struct {
 	ProjectID  int64
 	ProjectKey string
 }
 
+// Airbrake Service. Add this to your AppServicer and call Configure and Build
+// to add Airbrake support to your AppServicer.
 type AirbrakeService struct {
 	Config   AirbrakeConfig
 	Notifier *gobrake.Notifier
 }
 
+// Configures the AirbrakeService
 func (s *AirbrakeService) Configure(app *Application) error {
 	return app.BindConfigAt(&s.Config, "airbrake")
 }
 
+// Prepares the application to use the AirbrakeService. The function will:
+//
+// 1. Add a recovery handler to gin
+// 2. Replace app.OnException with a version that writes the airbrak in addition
+//    to logging
+// 3. Sets the Notifier object that will be used to push notices to Airbrake
 func (s *AirbrakeService) Build(app *Application) error {
 	s.Notifier = gobrake.NewNotifier(s.Config.ProjectID, s.Config.ProjectKey)
 
-	app.Engine.Use(s.RecoveryHandler(app))
-	app.OnException = s.ExceptionHandler(app)
+	app.Engine.Use(s.RecoveryMiddleware(app))
+	app.OnException = s.OnException(app)
 	return nil
 }
 
+// Generates a gin route handler for triggering a panic. This is used for testing
+// that the recovery works.
 func (s *AirbrakeService) PanicHandler(app *Application) func(*gin.Context) {
 	return func(c *gin.Context) {
 		panic("Panicking")
 	}
 }
 
-func (s *AirbrakeService) RecoveryHandler(app *Application) func(*gin.Context) {
+// Generates a gin middleware for recovering from panics.
+func (s *AirbrakeService) RecoveryMiddleware(app *Application) func(*gin.Context) {
 	w := gin.DefaultWriter
 	return func(c *gin.Context) {
 		defer func() {
@@ -53,7 +66,8 @@ func (s *AirbrakeService) RecoveryHandler(app *Application) func(*gin.Context) {
 	}
 }
 
-func (s *AirbrakeService) ExceptionHandler(app *Application) func(*gin.Context, error) {
+// The OnExeption replacement for app
+func (s *AirbrakeService) OnException(app *Application) func(*gin.Context, error) {
 	return func(c *gin.Context, err error) {
 		app.LogException(c, err)
 		s.Notifier.Notify(err, c.Request)

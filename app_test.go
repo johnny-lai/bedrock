@@ -8,7 +8,7 @@ import (
 
 var _ = Describe("App", func() {
 	var (
-		app  *Application
+		app *Application
 	)
 
 	BeforeEach(func() {

@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v2"
-	log "github.com/Sirupsen/logrus"
 	"os"
 	"path"
 	"runtime"
@@ -35,18 +35,16 @@ type Application struct {
 }
 
 func init() {
-  // Log as JSON instead of the default ASCII formatter.
-  log.SetFormatter(&log.JSONFormatter{})
+	// Log as JSON instead of the default ASCII formatter.
+	log.SetFormatter(&log.JSONFormatter{})
 }
 
-/*
-Reads the specified config file. Note that bedrock.Application will process
-the config file, using text/template, with the following extra functions:
-
-	{{.Env "ENVIRONMENT_VARIABLE"}}
-	{{.Cat "File name"}}
-	{{.Base64 "a string"}}
-*/
+// Reads the specified config file. Note that bedrock.Application will process
+// the config file, using text/template, with the following extra functions:
+//
+//     {{.Env "ENVIRONMENT_VARIABLE"}}
+//     {{.Cat "File name"}}
+//     {{.Base64 "a string"}}
 func (app *Application) ReadConfigFile(file string) error {
 	if _, err := os.Stat(file); err != nil {
 		return errors.New("config path not valid")
@@ -68,10 +66,28 @@ func (app *Application) ReadConfigFile(file string) error {
 	return nil
 }
 
+// Unmarshals the config to the specified config variable. You would use this
+// to map the config to a struct. For example:
+//
+//     type Config struct {
+//         Key1 string
+//         Key2 int
+//     }
+//     var c Config
+//     app.BindConfig(&c)
 func (app *Application) BindConfig(config interface{}) error {
 	return yaml.Unmarshal(app.ConfigBytes, config)
 }
 
+// Unmarshals the config at the specified key to the specified config variable.
+// You would use this to map part of the config to a struct. For example:
+//
+//     type Config struct {
+//         User string
+//         Password int
+//     }
+//     var c Config
+//     app.BindConfigAt(&c, "db")
 func (app *Application) BindConfigAt(config interface{}, key string) error {
 	var full = make(map[interface{}]interface{})
 	if err := app.BindConfig(&full); err != nil {
@@ -83,7 +99,7 @@ func (app *Application) BindConfigAt(config interface{}, key string) error {
 		log.Fatal(err)
 		return err
 	}
-	
+
 	return yaml.Unmarshal([]byte(d), config)
 }
 
@@ -165,6 +181,7 @@ func (app *Application) initCli() {
 	}
 }
 
+// Creates a new application with the specified AppServicer
 func NewApp(svc AppServicer) *Application {
 	app := new(Application)
 

@@ -1,16 +1,16 @@
 package bedrock
 
 import (
+	"github.com/gin-gonic/gin"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/gin-gonic/gin"
 	"testing"
 )
 
 var _ = Describe("NewRelicService", func() {
 	var (
-		app  *Application
-		svc  *NewRelicService
+		app *Application
+		svc *NewRelicService
 	)
 
 	BeforeEach(func() {

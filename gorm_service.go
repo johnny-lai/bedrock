@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// Database Config
 type DbConfig struct {
 	User     string
 	Password string
@@ -13,24 +14,30 @@ type DbConfig struct {
 	Database string
 }
 
+// Gorm Service. Add this to your AppService and call Configure and Build to
+// add Gorm DB support to your AppServicer
 type GormService struct {
 	Config DbConfig
 }
 
+// Returns a DB connection
 func (s *GormService) Db() (gorm.DB, error) {
 	connectionString := s.Config.User + ":" + s.Config.Password + "@tcp(" + s.Config.Host + ":3306)/" + s.Config.Database + "?charset=utf8&parseTime=True"
 
 	return gorm.Open("mysql", connectionString)
 }
 
+// Configures the GormService
 func (s *GormService) Configure(app *Application) error {
 	return app.BindConfigAt(&s.Config, "db")
 }
 
+// Builds GormService
 func (s *GormService) Build(app *Application) error {
 	return nil
 }
 
+// Generates a gin route handler for health checks that will ping the database
 func (s *GormService) HealthHandler(app *Application) func(*gin.Context) {
 	return func(c *gin.Context) {
 		db, _ := s.Db()
