@@ -18,7 +18,7 @@ VERSION = $(MAJOR_VERSION).$(MINOR_VERSION).$(BUILD_NUMBER)
 
 # Application settings
 APP_NAME ?= unset
-APP_DOCKER_LABEL ?= unset
+APP_DOCKER_LABEL ?= $(APP_NAME)
 APP_GO_LINKING ?= dynamic
 APP_GO_SOURCES ?= main.go
 APP_DOCKER_PUSH ?= yes
