@@ -104,9 +104,6 @@ func main() {
           log.Fatalf("Unknown fixture %s specified. Expected %s to be a directory.", fixture, fixture_root)
         }
 
-
-        log.Printf("Base Path: %s\n", root)
-
         generateFixture := (func (path string, info os.FileInfo, err error) error {
           basename := filepath.Base(path)
           if basename[0] == '.' {

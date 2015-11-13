@@ -1,0 +1,35 @@
+package: main
+import:
+  - package: github.com/airbrake/gobrake
+    version: e5efbe565a5a63d8aafee7efa2f4fdd7f42b7bd3
+  - package: github.com/onsi/gomega
+    version: 2152b45fa28a361beba9aab0885972323a444e28
+  - package: github.com/codegangsta/cli
+    version: 96f1fedb28e10f2e5ad3fd4b7347101529a7ca56
+  - package: github.com/jinzhu/gorm
+    version: 20e37a05337026c18c4f74285ae1f47323d0e9eb
+  - package: github.com/onsi/ginkgo
+    version: 39d2c24f8a92c88f7e7f4d8ec6c80d3cc8f5ac65
+  - package: github.com/johnny-lai/bedrock
+  - package: gopkg.in/yaml.v2
+    version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
+  - package: github.com/go-sql-driver/mysql
+    version: 527bcd55aab2e53314f1a150922560174b493034
+  - package: github.com/yvasiyarov/go-metrics
+  - package: github.com/gin-gonic/contrib
+    subpackages:
+      - newrelic
+  - package: github.com/gin-gonic/gin
+    version: 52fcc5dbf6e94df33ad313858fb94b713e9d1b4a
+  - package: github.com/yvasiyarov/newrelic_platform_go
+    ref:     db03d6dfd965ebc22dbfd910567c641b326ff055
+    repo:    https://github.com/yvasiyarov/newrelic_platform_go
+    vcs:     git
+  - package: github.com/yvasiyarov/gorelic
+    ref:     91d90dde5a9c1684e5312f07b220f3f77680c0a0
+    repo:    https://github.com/yvasiyarov/gorelic
+    vcs:     git
+  - package: github.com/Sirupsen/logrus
+    ref:     fe6f2b03125e4fcafb21406381010e363a072c80
+    repo:    https://github.com/Sirupsen/logrus
+    vcs:     git

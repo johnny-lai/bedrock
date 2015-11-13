@@ -18,6 +18,7 @@ build: deps
 clean:
 	go clean
 	git clean -ffxd vendor
+	rm $(BEDROCK)
 	rm -f $(BUILD_ROOT)/$(APP_NAME)
 	rm -rf tmp
 
