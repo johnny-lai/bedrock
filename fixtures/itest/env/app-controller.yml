@@ -1,29 +1,29 @@
 apiVersion: v1
 kind: ReplicationController
 metadata:
-  name: ${PO_APP_NAME}
+  name: {{.Env "PO_APP_NAME"}}
   labels:
-    name: ${PO_APP_NAME}
-    app: ${APP_NAME}
+    name: {{.Env "PO_APP_NAME"}}
+    app: {{.Env "APP_NAME"}}
 spec:
   replicas: 1
   selector:
-    name: ${PO_APP_NAME}
+    name: {{.Env "PO_APP_NAME"}}
   template:
     metadata:
       labels:
-        name: ${PO_APP_NAME}
+        name: {{.Env "PO_APP_NAME"}}
     spec:
       volumes:
       - name: db-secrets-volume
         secret:
-          secretName: ${SECRET_DB_NAME}
+          secretName: {{.Env "SECRET_DB_NAME"}}
       containers:
       - name: app
-        image: ${PO_APP_IMAGE}
+        image: {{.Env "APP_DOCKER_LABEL"}}:{{`{{.Env "COMMIT"}}`}}
         env:
         - name: GIN_MODE
-          value: release
+          value: debug
         - name: DB_ENV_MYSQL_ROOT_PASSWORD
           value: whatever
         volumeMounts:

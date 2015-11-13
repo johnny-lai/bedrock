@@ -6,6 +6,7 @@ include $(BEDROCK_ROOT)/make/build.mk
 include $(BEDROCK_ROOT)/make/itest.mk
 include $(BEDROCK_ROOT)/make/utest.mk
 include $(BEDROCK_ROOT)/make/ibench.mk
+include $(BEDROCK_ROOT)/make/gen.mk
 
 migrate:
 	./cmd/server/server --config config.yaml migratedb

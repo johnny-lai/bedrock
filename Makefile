@@ -4,7 +4,10 @@ IMAGE_NAME = johnnylai/bedrock-dev
 
 build:
 	go build cli/bedrock.go
-	
+
+fmt:
+	go fmt
+
 image:
 	docker build -t $(IMAGE_NAME) -f docker/dev/Dockerfile docker/dev
 	docker tag -f $(IMAGE_NAME) $(IMAGE_NAME):$(COMMIT)

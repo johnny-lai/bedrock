@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 type TemplateContext struct {
@@ -25,4 +26,14 @@ func (c *TemplateContext) Cat(file string) string {
 // Returns a Base64 representation of the specified string.
 func (c *TemplateContext) ToBase64(s string) string {
 	return base64.StdEncoding.EncodeToString([]byte(s))
+}
+
+// Returns a upper-case representation of the specified string.
+func (c *TemplateContext) ToUpper(s string) string {
+	return strings.ToUpper(s)
+}
+
+// Returns a upper-case representation of the specified string.
+func (c *TemplateContext) ToUnderscore(s string) string {
+	return strings.Replace(s, "-", "_", -1)
 }
