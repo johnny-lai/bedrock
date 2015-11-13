@@ -3,7 +3,7 @@ package service
 import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/johnny-lai/bedrock"
-	"go-service-basic/core/model"
+	"{{.Env "APP_NAME"}}/core/model"
 )
 
 type Config struct {
