@@ -14,6 +14,13 @@ to be installed.
 
 2. Include the `boot.mk` into your Makefile to get all the bedrock build rules
 
+   This is the minimal sample:
+   ```
+   APP_NAME = your-app-name
+   include vendor/github.com/johnny-lai/bedrock/boot.mk
+   ```
+
+   This is a sample with all the options:
    ```
    APP_NAME = your-app-name
    APP_DOCKER_LABEL = your-docker-label  # Used for generating docker container labels
