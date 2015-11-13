@@ -12,21 +12,7 @@ to be installed.
    $ git submodule add -f git@github.com:johnny-lai/bedrock vendor/github.com/johnny-lai/bedrock
    ```
 
-2. Add a [`glide.yaml`](https://github.com/Masterminds/glide) to your project
-
-   ```
-   $ glide create
-   ```
-   
-3. Add dependencies needed by bedrock into your `glide.yaml`.
-
-   ```
-   - package: gopkg.in/yaml.v2
-   - package: github.com/codegangsta/cli
-   - package: github.com/gin-gonic/gin
-   ```
-
-4. Include the `boot.mk` into your Makefile to get all the bedrock build rules
+2. Include the `boot.mk` into your Makefile to get all the bedrock build rules
 
    ```
    BEDROCK_ROOT = $(realpath vendor/github.com/johnny-lai/bedrock)
@@ -37,12 +23,36 @@ to be installed.
    APP_DOCKER_PUSH = yes       # Set to no to avoid publishing your docker image. Default is yes
    APP_GO_PACKAGES = packages  # Set to all the go package names that make up your service
    APP_GO_SOURCES = file.go    # Set to all the go source files used to build your main service
-                               # Defaults to $(APP_NAME).go
+                               # Defaults to main.go
    ```
-   
-5. Create your docker images. Place your `Dockerfile`s in the `docker/dist` and `docker/testdb` folder.
+	 
+3. Generate your application. You can generate the portions piece-meal:
 
-6. Create your integration tests. Place your tests in the `itest` folder, and your Kubernetes pod and service definitions in `itest/env`.
+   ```
+	 # Generate a sample app
+   $ make gen-app
+
+   # Generate sample configs for the app
+	 $ make gen-itest
+
+   # Generate docker images
+	 $ make gen-docker
+
+   # Generate an integration test environment
+	 $ make gen-itest
+
+	 # Generate a Swagger API doc
+	 $ make gen-api
+   ```
+	 
+	 or all at once:
+	 
+	 ```
+	 # make gen-all
+	 ```
+
+4. The generated README.md should contain more information on how to build and
+   test your app.
 
 ## Integrating with Jenkins
 

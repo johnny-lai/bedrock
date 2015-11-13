@@ -58,10 +58,10 @@ BEDROCK = $(SRCROOT)/bedrock
 deps: $(GLIDE) $(BUILD_ROOT)
 	if [ ! -d vendor/github.com/gin-gonic/gin ]; then $(GLIDE) update; fi
 
-$(GLIDE):
+$(GLIDE): $(SRCROOT)/glide.yaml
 	go get github.com/Masterminds/glide
 
-$(BEDROCK): $(BEDROCK_ROOT)/cli/*.go
+$(BEDROCK): $(BEDROCK_ROOT)/cli/*.go deps
 	GO15VENDOREXPERIMENT=1 go build -o $(BEDROCK) $(BEDROCK_ROOT)/cli/bedrock.go
 
 $(BUILD_ROOT):
