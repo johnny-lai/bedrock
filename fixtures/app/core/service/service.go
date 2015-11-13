@@ -3,7 +3,6 @@ package service
 import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/johnny-lai/bedrock"
-	"{{.Env "APP_NAME"}}/core/model"
 )
 
 type Config struct {
@@ -43,8 +42,6 @@ func (s *Service) Migrate(app *bedrock.Application) error {
 		return err
 	}
 	db.SingularTable(true)
-
-	db.AutoMigrate(&model.Todo{})
 	return nil
 }
 
