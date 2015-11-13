@@ -15,15 +15,13 @@ to be installed.
 2. Include the `boot.mk` into your Makefile to get all the bedrock build rules
 
    ```
-   BEDROCK_ROOT = $(realpath vendor/github.com/johnny-lai/bedrock)
-   include $(BEDROCK_ROOT)/boot.mk 
-
    APP_NAME = your-app-name
    APP_DOCKER_LABEL = your-docker-label  # Used for generating docker container labels
    APP_DOCKER_PUSH = yes       # Set to no to avoid publishing your docker image. Default is yes
    APP_GO_PACKAGES = packages  # Set to all the go package names that make up your service
    APP_GO_SOURCES = file.go    # Set to all the go source files used to build your main service
                                # Defaults to main.go
+   include vendor/github.com/johnny-lai/bedrock/boot.mk 
    ```
 	 
 3. Generate your application. You can generate the portions piece-meal:
