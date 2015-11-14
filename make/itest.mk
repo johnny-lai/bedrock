@@ -28,13 +28,13 @@ itest.env: itest.env.stop itest.env.start
 
 itest.env.start: $(BEDROCK)
 	for n in $(KUBE_SECRETS); do \
-		$(BEDROCK) dump $$n | cat - | kubectl create -f - ; \
+		$(BEDROCK) dump $$n | kubectl create -f - ; \
 	done
 	for n in $(KUBE_CONTROLLERS); do \
-		$(BEDROCK) dump $$n | cat - | kubectl create -f - ; \
+		$(BEDROCK) dump $$n | kubectl create -f - ; \
 	done
 	for n in $(KUBE_SERVICES); do \
-		$(BEDROCK) dump $$n | cat - | kubectl create -f - ; \
+		$(BEDROCK) dump $$n | kubectl create -f - ; \
 	done
 	-wait-for-pod.sh $(SVC_APP_NAME)
 
