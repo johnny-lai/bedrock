@@ -11,10 +11,10 @@ distutest.run:
 	docker run --rm \
 	           --link $(APP_NAME)-testdb:$(APP_NAME)-db \
 	           -v $(SRCROOT):$(SRCROOT_D) \
+	           -v $(BEDROCK_ROOT)/make/db-secrets:/etc/db-secrets \
 	           -w $(SRCROOT_D) \
 	           -e DEV_UID=$(DOCKER_DEV_UID) \
 	           -e DEV_GID=$(DOCKER_DEV_GID) \
-	           -e DB_ENV_MYSQL_ROOT_PASSWORD=whatever \
 	           -e TEST_CONFIG_YML=$(TEST_CONFIG_YML_D) \
 	           $(DOCKER_DEVIMAGE) \
 	           make utest

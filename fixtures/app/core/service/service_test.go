@@ -15,7 +15,7 @@ import (
 var _ = Describe("Service", func() {
 	var (
 		app *bedrock.Application
-		svc TodoService
+		svc Service
 	)
 
 	BeforeEach(func() {
@@ -55,7 +55,7 @@ var _ = Describe("Service", func() {
 	})
 })
 
-func TestTodoService(t *testing.T) {
+func TestService(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Service")
 }

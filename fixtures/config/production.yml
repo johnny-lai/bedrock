@@ -1,7 +1,7 @@
 svchost: :8080
 db:
-  user: root
-  password: {{`{{.Cat "/db/secrets"}}`}}
+  user: {{`{{.Cat "/etc/db-secrets/username"}}`}}
+  password: {{`{{.Cat "/etc/db-secrets/password"}}`}}
   host: {{`{{.Env "`}}{{.Env "APP_NAME" | .ToUpper | .ToUnderscore}}{{`_DB_PORT_3306_TCP_ADDR"}}`}}
   database: {{.Env "APP_NAME"}}
 airbrake:
