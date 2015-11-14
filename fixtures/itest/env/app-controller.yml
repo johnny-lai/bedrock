@@ -14,6 +14,7 @@ spec:
       labels:
         name: {{.Env "PO_APP_NAME"}}
     spec:
+      imagePullPolicy: Always
       volumes:
       - name: db-secrets-volume
         secret:
@@ -24,8 +25,6 @@ spec:
         env:
         - name: GIN_MODE
           value: debug
-        - name: DB_ENV_MYSQL_ROOT_PASSWORD
-          value: whatever
         volumeMounts:
         - name: db-secrets-volume
           mountPath: /etc/db-secrets
