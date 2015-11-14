@@ -28,6 +28,8 @@ distbuild: $(PRODUCT_PATH)
 
 distpush: image-dist.push image-testdb.push
 
+distpublish: image-dist.publish image-testdb.publish
+
 deploy: image-testdb distutest image-dist distpush distitest
 
 image-testdb:
@@ -37,9 +39,13 @@ image-testdb:
 
 image-testdb.push:
 	if [ "$(APP_DOCKER_PUSH)" != "no" ]; then \
+		$(DOCKER_PUSH) $(TESTDB_DOCKER_LABEL_COMMIT); \
+	fi
+
+image-testdb.publish:
+	if [ "$(APP_DOCKER_PUSH)" != "no" ]; then \
 		$(DOCKER_PUSH) $(TESTDB_DOCKER_LABEL); \
 		$(DOCKER_PUSH) $(TESTDB_DOCKER_LABEL_VERSION); \
-		$(DOCKER_PUSH) $(TESTDB_DOCKER_LABEL_COMMIT); \
 	fi
 
 image-dist: distbuild
@@ -49,9 +55,13 @@ image-dist: distbuild
 
 image-dist.push:
 	if [ "$(APP_DOCKER_PUSH)" != "no" ]; then \
+		$(DOCKER_PUSH) $(APP_DOCKER_LABEL_COMMIT); \
+	fi
+
+image-dist.publish:
+	if [ "$(APP_DOCKER_PUSH)" != "no" ]; then \
 		$(DOCKER_PUSH) $(APP_DOCKER_LABEL); \
 		$(DOCKER_PUSH) $(APP_DOCKER_LABEL_VERSION); \
-		$(DOCKER_PUSH) $(APP_DOCKER_LABEL_COMMIT); \
 	fi
 
 $(PRODUCT_PATH): $(wildcard *.go)
