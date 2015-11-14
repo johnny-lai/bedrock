@@ -3,6 +3,8 @@ KUBE_CONTROLLERS = $(wildcard $(APP_ITEST_ENV_ROOT)/*-controller.yml)
 KUBE_SERVICES = $(wildcard $(APP_ITEST_ENV_ROOT)/*-service.yml)
 
 export APP_NAME
+export VERSION
+export COMMIT
 
 export PO_APP_NAME = $(APP_NAME)
 export PO_APP_IMAGE = $(APP_DOCKER_LABEL_COMMIT)
@@ -13,7 +15,6 @@ export PO_DB_IMAGE = $(TESTDB_DOCKER_LABEL_COMMIT)
 export SVC_DB_NAME = $(PO_DB_NAME)
 
 export SECRET_DB_NAME = $(APP_NAME)-db-secret
-
 #
 CLUSTER_SERVER ?= $(shell kubectl get svc $(SVC_APP_NAME) -o json | jq -r '.status.loadBalancer.ingress[0].ip')
 CLUSTER_PORT ?= $(shell kubectl get svc $(SVC_APP_NAME) -o json | jq '.spec.ports[0].targetPort')
