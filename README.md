@@ -31,7 +31,9 @@ to be installed.
    include vendor/github.com/johnny-lai/bedrock/boot.mk 
    ```
 	 
-3. Generate your application. You can generate the portions piece-meal:
+3. Commit your changes now. If you don't have a commit number, you will get a lot of warning messages during build.
+ 
+4. Generate your application. You can generate the portions piece-meal:
 
    ```
 	 # Generate a sample app
@@ -56,7 +58,7 @@ to be installed.
 	 # make gen-all
 	 ```
 
-4. The generated README.md should contain more information on how to build and
+5. The generated README.md should contain more information on how to build and
    test your app.
 
 ## Integrating with Jenkins
