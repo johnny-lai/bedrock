@@ -4,13 +4,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	log "github.com/Sirupsen/logrus"
+	"github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v2"
 	"os"
 	"path"
-	"runtime"
 	"text/template"
 )
 
@@ -28,15 +27,11 @@ type Application struct {
 
 	ConfigBytes []byte
 
+	Log      *logrus.Logger
 	Servicer AppServicer
 	Engine   *gin.Engine
 
 	OnException func(*gin.Context, error)
-}
-
-func init() {
-	// Log as JSON instead of the default ASCII formatter.
-	log.SetFormatter(&log.JSONFormatter{})
 }
 
 // Reads the specified config file. Note that bedrock.Application will process
@@ -91,12 +86,12 @@ func (app *Application) BindConfig(config interface{}) error {
 func (app *Application) BindConfigAt(config interface{}, key string) error {
 	var full = make(map[interface{}]interface{})
 	if err := app.BindConfig(&full); err != nil {
-		log.Fatal(err)
+		app.Log.Fatal(err)
 		return err
 	}
 	d, err := yaml.Marshal(full[key])
 	if err != nil {
-		log.Fatal(err)
+		app.Log.Fatal(err)
 		return err
 	}
 
@@ -104,14 +99,9 @@ func (app *Application) BindConfigAt(config interface{}, key string) error {
 }
 
 func (app *Application) LogException(c *gin.Context, err error) {
-	maxStackTraceSize := 4096
-
-	w := gin.DefaultWriter
-	w.Write([]byte(fmt.Sprintf("[EXCEPTION] %v\n", err)))
-
-	trace := make([]byte, maxStackTraceSize)
-	runtime.Stack(trace, false)
-	w.Write([]byte(trace))
+	app.Log.WithFields(logrus.Fields{
+		"trace": StackTrace(),
+	}).Error(err)
 }
 
 func (app *Application) initCli() {
@@ -132,19 +122,19 @@ func (app *Application) initCli() {
 			Usage: "Print the configurations",
 			Action: func(c *cli.Context) {
 				if err := app.ReadConfigFile(c.GlobalString("config")); err != nil {
-					log.Fatal(err)
+					app.Log.Fatal(err)
 					return
 				}
 
 				var config interface{}
 				if err := app.BindConfig(&config); err != nil {
-					log.Fatal(err)
+					app.Log.Fatal(err)
 					return
 				}
 
 				d, err := yaml.Marshal(config)
 				if err != nil {
-					log.Fatalf("error: %v", err)
+					app.Log.Fatalf("error: %v", err)
 				}
 				fmt.Printf(string(d))
 			},
@@ -154,16 +144,16 @@ func (app *Application) initCli() {
 			Usage: "Run the http server",
 			Action: func(c *cli.Context) {
 				if err := app.ReadConfigFile(c.GlobalString("config")); err != nil {
-					log.Fatal(err)
+					app.Log.Fatal(err)
 					return
 				}
 
 				if err := svc.Configure(app); err != nil {
-					log.Fatal(err)
+					app.Log.Fatal(err)
 				}
 
 				if err := svc.Build(app); err != nil {
-					log.Fatal(err)
+					app.Log.Fatal(err)
 				}
 
 				svc.Run(app)
@@ -174,7 +164,7 @@ func (app *Application) initCli() {
 			Usage: "Perform database migrations",
 			Action: func(c *cli.Context) {
 				if err := svc.Migrate(app); err != nil {
-					log.Fatal(err)
+					app.Log.Fatal(err)
 				}
 			},
 		},
@@ -184,6 +174,9 @@ func (app *Application) initCli() {
 // Creates a new application with the specified AppServicer
 func NewApp(svc AppServicer) *Application {
 	app := new(Application)
+
+	app.Log = logrus.New()
+	app.Log.Formatter = &logrus.JSONFormatter{}
 
 	app.Servicer = svc
 	app.Engine = gin.Default()

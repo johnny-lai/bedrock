@@ -65,8 +65,11 @@ func (s *Service) Build(app *bedrock.Application) error {
 	db.SingularTable(true)
 
 	r := app.Engine
-	r.GET("/health", s.dbsvc.HealthHandler(app))
-	r.GET("/panic", s.airbrake.PanicHandler(app))
+	v1 := r.Group("/api/v1")
+	{
+		v1.GET("/health", s.dbsvc.HealthHandler(app))
+		v1.GET("/panic", s.airbrake.PanicHandler(app))
+	}
 
 	return nil
 }

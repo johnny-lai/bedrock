@@ -10,7 +10,7 @@ func host() string {
 }
 
 func TestHealth(t *testing.T) {
-  url := host() + "/health"
+  url := host() + "/api/v1/health"
 
   r, err := makeRequest("GET", url, nil)
   if err != nil {
@@ -26,7 +26,7 @@ func TestHealth(t *testing.T) {
 }
 
 func BenchmarkHealth(b *testing.B) {
-  url := host() + "/health"
+  url := host() + "/api/v1/health"
 
   for n := 0; n < b.N; n++ {
     r, err := makeRequest("GET", url, nil)

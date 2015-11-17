@@ -47,7 +47,7 @@ var _ = Describe("Service", func() {
 
 	Describe("#Health", func() {
 		It("should not raise an error", func() {
-			request, _ := http.NewRequest("GET", "/health", nil)
+			request, _ := http.NewRequest("GET", "/api/v1/health", nil)
 			response := httptest.NewRecorder()
 			app.Engine.ServeHTTP(response, request)
 			Expect(response.Code).To(Equal(http.StatusOK))

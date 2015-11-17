@@ -28,6 +28,11 @@ func (c *TemplateContext) ToBase64(s string) string {
 	return base64.StdEncoding.EncodeToString([]byte(s))
 }
 
+// Returns a lower-case representation of the specified string.
+func (c *TemplateContext) ToLower(s string) string {
+	return strings.ToLower(s)
+}
+
 // Returns a upper-case representation of the specified string.
 func (c *TemplateContext) ToUpper(s string) string {
 	return strings.ToUpper(s)

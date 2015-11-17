@@ -1,0 +1,39 @@
+# API documentation
+# You can view/edit this using http://editor.swagger.io/#/
+swagger: '2.0'
+info:
+  title: {{.Env "APP_NAME"}} API
+  description: FILL ME IN
+  version: '0.0'
+host: {{.Env "APP_NAME" | .ToLower | .ToUnderscore}}.coupahost.com
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /api/v1
+produces:
+  - application/json
+paths:
+  /health:
+    get:
+      summary: Health-check
+      description: Checks if the service is healthy
+      responses:
+        200:
+          description: Indicates if the service is healthy
+          schema:
+            type: boolean
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Error:
+    properties:
+      message:
+        type: string
+        description: a short summary of the error condition
+      description:
+        type: string
+        description: long blurb such as a trace or detailed error message. Be sure to suppressed any sensitive data when in production mode
+

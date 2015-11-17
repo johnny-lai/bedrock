@@ -44,10 +44,10 @@ func (s *GormService) HealthHandler(app *Application) func(*gin.Context) {
 
 		err := db.Exec("DO 1;").Error
 		if err == nil {
-			c.JSON(http.StatusOK, gin.H{"status": "success"})
+			c.JSON(http.StatusOK, true)
 		} else {
 			app.OnException(c, err)
-			c.AbortWithError(http.StatusInternalServerError, err)
+			c.JSON(http.StatusInternalServerError, Errorf("%v", err))
 		}
 	}
 }

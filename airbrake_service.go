@@ -50,15 +50,15 @@ func (s *AirbrakeService) PanicHandler(app *Application) func(*gin.Context) {
 
 // Generates a gin middleware for recovering from panics.
 func (s *AirbrakeService) RecoveryMiddleware(app *Application) func(*gin.Context) {
-	w := gin.DefaultWriter
 	return func(c *gin.Context) {
 		defer func() {
 			if rval := recover(); rval != nil {
 				rvalStr := fmt.Sprint(rval)
-				w.Write([]byte(fmt.Sprintf("recovering from:%s at:%s", rvalStr, c.Request.URL)))
+				app.Log.Errorf("recovering from:%s at:%s", rvalStr, c.Request.URL)
+
 				err := errors.New(rvalStr)
 				app.OnException(c, err)
-				c.AbortWithError(http.StatusInternalServerError, err)
+				c.JSON(http.StatusInternalServerError, Errorf("%v", err))
 			}
 			defer s.Notifier.Flush()
 		}()
