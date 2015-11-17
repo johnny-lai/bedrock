@@ -24,6 +24,28 @@ clean:
 
 dist: image-dist image-testdb
 
+distrun:
+	docker run --rm \
+	           --link $(APP_NAME)-testdb:$(APP_NAME)-db \
+             -p 8080:8080 \
+	           -v $(APP_SECRETS_ROOT):/etc/secrets \
+	           $(APP_DOCKER_LABEL_COMMIT)
+
+distrun.env:
+	docker run --rm \
+	           --link $(APP_NAME)-testdb:$(APP_NAME)-db \
+	           -v $(APP_SECRETS_ROOT):/etc/secrets \
+	           $(APP_DOCKER_LABEL_COMMIT) \
+             env
+
+distrun.sh:
+	docker run --rm \
+	           --link $(APP_NAME)-testdb:$(APP_NAME)-db \
+	           -v $(APP_SECRETS_ROOT):/etc/secrets \
+	           --entrypoint sh \
+	           -it \
+	           $(APP_DOCKER_LABEL_COMMIT)
+
 distbuild: $(PRODUCT_PATH)
 
 distpush: image-dist.push image-testdb.push

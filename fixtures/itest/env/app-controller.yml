@@ -16,9 +16,15 @@ spec:
     spec:
       imagePullPolicy: Always
       volumes:
+      - name: airbrake-secrets-volume
+        secret:
+          secretName: {{.Env "APP_NAME"}}-airbrake-secret
       - name: db-secrets-volume
         secret:
-          secretName: {{.Env "SECRET_DB_NAME"}}
+          secretName: {{.Env "APP_NAME"}}-db-secret
+      - name: newrelic-secrets-volume
+        secret:
+          secretName: {{.Env "APP_NAME"}}-newrelic-secret
       containers:
       - name: app
         image: {{.Env "APP_DOCKER_LABEL"}}:{{`{{.Env "COMMIT"}}`}}
@@ -26,8 +32,14 @@ spec:
         - name: GIN_MODE
           value: debug
         volumeMounts:
+        - name: airbrake-secrets-volume
+          mountPath: /etc/secrets/airbrake
+          readOnly: true
         - name: db-secrets-volume
-          mountPath: /etc/db-secrets
+          mountPath: /etc/secrets/db
+          readOnly: true
+        - name: newrelic-secrets-volume
+          mountPath: /etc/secrets/newrelic
           readOnly: true
         ports:
         - containerPort: 8080

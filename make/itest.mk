@@ -6,6 +6,7 @@ export APP_NAME
 export VERSION
 export COMMIT
 export APP_DOCKER_LABEL
+export APP_SECRETS_ROOT
 
 export PO_APP_NAME = $(APP_NAME)
 export PO_APP_IMAGE = $(APP_DOCKER_LABEL_COMMIT)

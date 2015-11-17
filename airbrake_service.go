@@ -10,6 +10,7 @@ import (
 
 // Airbrake Config
 type AirbrakeConfig struct {
+	Host string
 	ProjectID  int64
 	ProjectKey string
 }
@@ -34,6 +35,11 @@ func (s *AirbrakeService) Configure(app *Application) error {
 // 3. Sets the Notifier object that will be used to push notices to Airbrake
 func (s *AirbrakeService) Build(app *Application) error {
 	s.Notifier = gobrake.NewNotifier(s.Config.ProjectID, s.Config.ProjectKey)
+	s.Notifier.SetHost(s.Config.Host)
+	s.Notifier.AddFilter(func(notice *gobrake.Notice) *gobrake.Notice {
+		notice.Context["environment"] = gin.Mode()
+		return notice
+	})
 
 	app.Engine.Use(s.RecoveryMiddleware(app))
 	app.OnException = s.OnException(app)

@@ -20,5 +20,8 @@ gen-config: $(BEDROCK)
 gen-api: $(BEDROCK)
 	$(BEDROCK) --base $(BEDROCK_ROOT) generate api
 
+gen-secret: $(BEDROCK)
+	$(BEDROCK) --base $(BEDROCK_ROOT) generate secret $(APP_SECRETS_ROOT)
+
 $(SRCROOT)/glide.yaml:
 	cp $(BEDROCK_ROOT)/fixtures/glide.yaml $@

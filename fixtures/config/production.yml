@@ -1,13 +1,14 @@
 svchost: :8080
 db:
-  user: {{`{{.Cat "/etc/db-secrets/username"}}`}}
-  password: {{`{{.Cat "/etc/db-secrets/password"}}`}}
+  user: {{`{{.Cat "/etc/secrets/db/username"}}`}}
+  password: {{`{{.Cat "/etc/secrets/db/password"}}`}}
   host: {{`{{.Env "`}}{{.Env "APP_NAME" | .ToUpper | .ToUnderscore}}{{`_DB_PORT_3306_TCP_ADDR"}}`}}
   database: {{.Env "APP_NAME"}}
 airbrake:
-  projectid: 1234
-  projectkey: FIXME
+  host: {{`{{.Cat "/etc/secrets/airbrake/host"}}`}}
+  projectid: {{`{{.Cat "/etc/secrets/airbrake/projectid"}}`}}
+  projectkey: {{`{{.Cat "/etc/secrets/airbrake/projectkey"}}`}}
 newrelic:
-  licensekey: FIXME
+  licensekey: {{`{{.Cat "/etc/secrets/newrelic/licensekey"}}`}}
   appname: {{.Env "APP_NAME"}}
   verbose: false

@@ -11,7 +11,7 @@ distutest.run:
 	docker run --rm \
 	           --link $(APP_NAME)-testdb:$(APP_NAME)-db \
 	           -v $(SRCROOT):$(SRCROOT_D) \
-	           -v $(BEDROCK_ROOT)/make/db-secrets:/etc/db-secrets \
+	           -v $(APP_SECRETS_ROOT):/etc/secrets \
 	           -w $(SRCROOT_D) \
 	           -e DEV_UID=$(DOCKER_DEV_UID) \
 	           -e DEV_GID=$(DOCKER_DEV_GID) \

@@ -23,6 +23,7 @@ APP_GO_LINKING ?= static
 APP_GO_SOURCES ?= main.go
 APP_GO_PACKAGES ?= $(APP_NAME) $(APP_NAME)/core/service
 APP_DOCKER_PUSH ?= yes
+APP_SECRETS_ROOT ?= $(HOME)/.secrets/$(APP_NAME)
 APP_ITEST_ENV_ROOT ?= $(SRCROOT)/itest/env
 
 # Docker Labels
@@ -66,4 +67,7 @@ $(BEDROCK): $(BEDROCK_ROOT)/cli/*.go deps
 	GO15VENDOREXPERIMENT=1 go build -o $(BEDROCK) $(BEDROCK_ROOT)/cli/bedrock.go
 
 $(BUILD_ROOT):
+	mkdir -p $@
+
+$(APP_SECRETS_ROOT):
 	mkdir -p $@
