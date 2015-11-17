@@ -58,7 +58,16 @@ to be installed.
 	 # make gen-all
 	 ```
 
-5. The generated README.md should contain more information on how to build and
+5. Generate your secrets
+   ```
+	 $ make gen-secret
+	 ```
+	 The script will ask for secrets like the Airbrake and New Relic keys and
+	 put this into files in the `$HOME/.secrets/$APP_NAME` folder. This folder
+	 will be mounted into the docker images, and used to generate kubernetes
+	 secrets. The code and images themselves will not have these secrets.
+	 
+6. The generated README.md should contain more information on how to build and
    test your app.
 
 ## Integrating with Jenkins
