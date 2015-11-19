@@ -169,7 +169,7 @@ import (
 var version = "unset"
 
 func main() {
-	app := bedrock.NewApp(&service.TodoService{})
+	app := bedrock.NewApp(&service.Service{})
 	app.Name = "go-service-basic"
 	app.Version = version
 	app.Run(os.Args)
@@ -183,10 +183,11 @@ The `main.version` will be filled in by the `book.mk` during build.
 The service itself would need to implement the following interface:
 
 ```
+// AppServicer is the expected interface of Servicer implementations.
 type AppServicer interface {
-  Config() interface{}
-  Migrate() error
-  Build(r *gin.Engine) error
-  Run(r *gin.Engine) error
+	Configure(*Application) error
+	Migrate(*Application) error
+	Build(*Application) error
+	Run(*Application) error
 }
 ```
