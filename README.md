@@ -6,13 +6,30 @@ to be installed.
 
 ## Installation
 
-1. Add bedrock as a submodule
-   
+1. Install `go` and set your `GOPATH`
+
    ```
-   $ git submodule add -f git@github.com:johnny-lai/bedrock vendor/github.com/johnny-lai/bedrock
+   $ brew install go
+   $ export GOPATH=...
    ```
 
-2. Include the `boot.mk` into your Makefile to get all the bedrock build rules
+2. Create your new app in `${GOPATH}/src`. Be sure to initialize the git repo, so that we can pull down bedrock
+   using git.
+
+   ```
+   # In ${GOPATH}/src
+   $ mkdir your-app
+   $ cd your-app
+   $ git init
+   ```
+
+3. Add bedrock as a submodule
+   
+   ```
+   $ git submodule add -f https://github.com/johnny-lai/bedrock.git vendor/github.com/johnny-lai/bedrock
+   ```
+
+4. Include the `boot.mk` into your Makefile to get all the bedrock build rules
 
    This is the minimal sample:
    ```
@@ -31,43 +48,43 @@ to be installed.
    include vendor/github.com/johnny-lai/bedrock/boot.mk 
    ```
 	 
-3. Commit your changes now. If you don't have a commit number, you will get a lot of warning messages during build.
+5. Commit your changes now. If you don't have a commit number, you will get a lot of warning messages during build.
  
-4. Generate your application. You can generate the portions piece-meal:
+6. Generate your application. You can generate the portions piece-meal:
 
    ```
-	 # Generate a sample app
+   # Generate a sample app
    $ make gen-app
 
    # Generate sample configs for the app
-	 $ make gen-itest
+   $ make gen-itest
 
    # Generate docker images
-	 $ make gen-docker
+   $ make gen-docker
 
    # Generate an integration test environment
-	 $ make gen-itest
+   $ make gen-itest
 
-	 # Generate a Swagger API doc
-	 $ make gen-api
+   # Generate a Swagger API doc
+   $ make gen-api
    ```
 	 
-	 or all at once:
+   or all at once:
 	 
-	 ```
-	 # make gen-all
-	 ```
-
-5. Generate your secrets
    ```
-	 $ make gen-secret
-	 ```
-	 The script will ask for secrets like the Airbrake and New Relic keys and
-	 put this into files in the `$HOME/.secrets/$APP_NAME` folder. This folder
-	 will be mounted into the docker images, and used to generate kubernetes
-	 secrets. The code and images themselves will not have these secrets.
+   $ make gen-all
+   ```
+
+7. Generate your secrets
+   ```
+   $ make gen-secret
+   ```
+   The script will ask for secrets like the Airbrake and New Relic keys and
+   put this into files in the `$HOME/.secrets/$APP_NAME` folder. This folder
+   will be mounted into the docker images, and used to generate kubernetes
+   secrets. The code and images themselves will not have these secrets.
 	 
-6. The generated README.md should contain more information on how to build and
+8. The generated README.md should contain more information on how to build and
    test your app.
 
 ## Integrating with Jenkins
