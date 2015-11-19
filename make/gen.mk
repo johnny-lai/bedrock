@@ -25,3 +25,9 @@ gen-secret: $(BEDROCK)
 
 $(SRCROOT)/glide.yaml:
 	cp $(BEDROCK_ROOT)/fixtures/glide.yaml $@
+
+distgen-secret:
+	docker run -it --rm --net=host \
+	           $(DOCKER_OPTS) \
+	           $(DOCKER_DEVIMAGE) \
+	           make gen-secret

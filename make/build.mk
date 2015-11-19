@@ -1,5 +1,3 @@
-BUILD_ROOT ?= $(SRCROOT)
-
 # GO flags
 ifeq ($(APP_GO_LINKING), static)
 	GO_ENV ?= GO15VENDOREXPERIMENT=1 CGO_ENABLED=0
@@ -20,18 +18,18 @@ clean:
 	git clean -ffxd vendor
 	rm $(BEDROCK)
 	rm -f $(BUILD_ROOT)/$(APP_NAME)
-	rm -rf tmp
+	rm -rf $(TMP_ROOT)
 
 dist: image-dist image-testdb
 
-distrun:
+distrun: distutest.env
 	docker run --rm \
 	           --link $(APP_NAME)-testdb:$(APP_NAME)-db \
              -p 8080:8080 \
 	           -v $(APP_SECRETS_ROOT):/etc/secrets \
 	           $(APP_DOCKER_LABEL_COMMIT)
 
-distrun.env:
+distrun.env: distutest.env
 	docker run --rm \
 	           --link $(APP_NAME)-testdb:$(APP_NAME)-db \
 	           -v $(APP_SECRETS_ROOT):/etc/secrets \
@@ -46,7 +44,11 @@ distrun.sh:
 	           -it \
 	           $(APP_DOCKER_LABEL_COMMIT)
 
-distbuild: $(PRODUCT_PATH)
+distbuild:
+	docker run --rm \
+	           $(DOCKER_OPTS) \
+             $(DOCKER_DEVIMAGE) \
+	           make build
 
 distpush: image-dist.push image-testdb.push
 
@@ -85,16 +87,3 @@ image-dist.publish:
 		$(DOCKER_PUSH) $(APP_DOCKER_LABEL); \
 		$(DOCKER_PUSH) $(APP_DOCKER_LABEL_VERSION); \
 	fi
-
-$(PRODUCT_PATH): $(wildcard *.go)
-	docker run --rm \
-	           -v $(SRCROOT):$(SRCROOT_D) \
-	           -w $(SRCROOT_D) \
-	           -e BUILD_ROOT=$(BUILD_ROOT_D) \
-	           -e BUILD_NUMBER=$(BUILD_NUMBER) \
-	           -e DEV_UID=$(DOCKER_DEV_UID) \
-	           -e DEV_GID=$(DOCKER_DEV_GID) \
-	           $(DOCKER_DEVIMAGE) \
-	           make build
-
-
