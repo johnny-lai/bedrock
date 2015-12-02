@@ -17,14 +17,12 @@ export PO_DB_IMAGE = $(TESTDB_DOCKER_LABEL_COMMIT)
 export SVC_DB_NAME = $(PO_DB_NAME)
 
 export SECRET_DB_NAME = $(APP_NAME)-db-secret
-#
-CLUSTER_SERVER ?= $(shell kubectl get svc $(SVC_APP_NAME) -o json | jq -r '.status.loadBalancer.ingress[0].ip')
-CLUSTER_PORT ?= $(shell kubectl get svc $(SVC_APP_NAME) -o json | jq '.spec.ports[0].targetPort')
 
 itest: itest.env itest.run
 
 itest.run:
-	TEST_HOST="http://$(CLUSTER_SERVER):$(CLUSTER_PORT)" go test $(APP_NAME)/itest
+	. $(BEDROCK_ROOT)/scripts/cluster-env.sh && \
+    TEST_HOST="http://$(CLUSTER_IP):$(CLUSTER_PORT)" go test $(APP_NAME)/itest
 
 itest.env: itest.env.stop itest.env.start
 
