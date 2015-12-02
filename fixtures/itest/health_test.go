@@ -7,7 +7,7 @@ import (
 )
 
 func host() string {
-	return os.Getenv("TEST_HOST")
+	return os.Getenv("CLUSTER_SERVER")
 }
 
 func TestHealth(t *testing.T) {

@@ -9,5 +9,6 @@ fi
 export CLUSTER_TYPE
 export CLUSTER_IP
 export CLUSTER_PORT
+export CLUSTER_SERVER=http://$CLUSTER_IP:$CLUSTER_PORT
 
 env | grep "^CLUSTER_"

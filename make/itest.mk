@@ -22,7 +22,7 @@ itest: itest.env itest.run
 
 itest.run:
 	. $(BEDROCK_ROOT)/scripts/cluster-env.sh && \
-    TEST_HOST="http://$(CLUSTER_IP):$(CLUSTER_PORT)" go test $(APP_NAME)/itest
+	  go test $(APP_NAME)/itest
 
 itest.env: itest.env.stop itest.env.start
 
