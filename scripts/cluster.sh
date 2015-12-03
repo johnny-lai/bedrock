@@ -25,7 +25,7 @@ wait_for_cluster () {
   case "$CLUSTER_TYPE" in
   "NodePort" )
     i=0
-    while ! $(is_cluster_ready $1) && [ $i -lt 6 ]; do
+    while ! $(is_cluster_ready $1) && [ $i -lt 20 ]; do
       kubectl get ep $1
       echo [$i] Waiting for $1 to be ready...
       sleep 5;

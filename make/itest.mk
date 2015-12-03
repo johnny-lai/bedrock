@@ -21,7 +21,7 @@ export SECRET_DB_NAME = $(APP_NAME)-db-secret
 itest: itest.env itest.run
 
 itest.run:
-	. $(BEDROCK_ROOT)/scripts/cluster-env.sh && \
+	. $(CLUSTER_SH) env && \
 	  go test $(APP_NAME)/itest
 
 itest.env: itest.env.stop itest.env.start
