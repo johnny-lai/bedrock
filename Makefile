@@ -9,7 +9,7 @@ fmt:
 	go fmt
 
 image:
-	docker build -t $(IMAGE_NAME) -f docker/dev/Dockerfile docker/dev
+	docker build -t $(IMAGE_NAME) -f docker/dev/Dockerfile .
 	docker tag -f $(IMAGE_NAME) $(IMAGE_NAME):$(COMMIT)
 
 deploy: image

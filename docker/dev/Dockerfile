@@ -12,12 +12,12 @@ RUN curl -sSL https://get.kismatic.com/kubernetes/master.sh | sh
 # Extra tooling
 RUN apt-get install -y telnet jq
 
-COPY sudoers /etc/sudoers
+COPY docker/dev/sudoers /etc/sudoers
 
-COPY Makefile /go/Makefile
+COPY docker/dev/Makefile /go/Makefile
 
-COPY wait-for-pod.sh /bin/wait-for-pod.sh
+COPY docker/dev/entrypoint.sh /entrypoint.sh
 
-COPY entrypoint.sh /entrypoint.sh
+COPY scripts/cluster.sh /bin/cluster.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
