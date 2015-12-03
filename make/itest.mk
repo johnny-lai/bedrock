@@ -36,7 +36,7 @@ itest.env.start: $(BEDROCK)
 	for n in $(KUBE_SERVICES); do \
 		$(BEDROCK) dump $$n | kubectl create -f - ; \
 	done
-	-wait-for-pod.sh $(SVC_APP_NAME)
+	-$(CLUSTER_SH) wait $(SVC_APP_NAME)
 
 itest.env.stop:
 	-kubectl delete all -lapp=$(APP_NAME)

@@ -14,7 +14,6 @@ spec:
       labels:
         name: {{.Env "PO_APP_NAME"}}
     spec:
-      imagePullPolicy: Always
       volumes:
       - name: airbrake-secrets-volume
         secret:
@@ -28,6 +27,7 @@ spec:
       containers:
       - name: app
         image: {{.Env "APP_DOCKER_LABEL"}}:{{`{{.Env "COMMIT"}}`}}
+        imagePullPolicy: Always
         env:
         - name: GIN_MODE
           value: debug

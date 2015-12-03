@@ -61,6 +61,7 @@ KUBERNETES_CONFIG ?= $(BEDROCK_ROOT)/make/kubernetes.config.default
 # Executables
 GLIDE = $(GOPATH)/bin/glide
 BEDROCK = $(BUILD_ROOT)/bedrock
+CLUSTER_SH = $(BEDROCK_ROOT)/scripts/cluster.sh
 
 # Directory of gin. Used to detect if `glide update` is needed
 GIN_ROOT = $(SRCROOT)/vendor/github.com/gin-gonic/gin
