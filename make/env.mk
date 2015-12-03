@@ -36,7 +36,7 @@ TESTDB_DOCKER_LABEL_VERSION = $(TESTDB_DOCKER_LABEL):$(MAJOR_VERSION).$(MINOR_VE
 TESTDB_DOCKER_LABEL_COMMIT = $(TESTDB_DOCKER_LABEL):$(COMMIT)
 
 # Docker commands
-DOCKER_DEVIMAGE ?= johnnylai/bedrock-dev:17cbf55
+DOCKER_DEVIMAGE ?= johnnylai/bedrock-dev:47cf0de
 DOCKER_DEV_UID ?= $(shell which docker-machine &> /dev/null || id -u)
 DOCKER_DEV_GID ?= $(shell which docker-machine &> /dev/null || id -g)
 DOCKER_OPTS ?= -v $(SRCROOT):$(SRCROOT_D) \
