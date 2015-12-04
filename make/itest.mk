@@ -22,6 +22,7 @@ itest: itest.env itest.run
 
 itest.run:
 	. $(CLUSTER_SH) env $(SVC_APP_NAME) && \
+    echo $$CLUSTER_IP
 	  go test $(APP_NAME)/itest
 
 itest.env: itest.env.stop itest.env.start
@@ -43,19 +44,19 @@ itest.env.stop:
 	-kubectl delete secrets -lapp=$(APP_NAME)
 
 distitest:
-	docker run --rm --net=host \
+	$(DOCKER) run --rm --net=host \
 	           $(DOCKER_OPTS) \
 	           $(DOCKER_DEVIMAGE) \
 						 make itest
 
 distitest.env:
-	docker run --rm --net=host \
+	$(DOCKER) run --rm --net=host \
 	           $(DOCKER_OPTS) \
 	           $(DOCKER_DEVIMAGE) \
 						 make itest.env
 
 distitest.run:
-	docker run --rm --net=host \
+	$(DOCKER) run --rm --net=host \
 	           $(DOCKER_OPTS) \
 	           $(DOCKER_DEVIMAGE) \
 	           make itest.run

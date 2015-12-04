@@ -10,7 +10,7 @@ distibench: distibench.env distibench.run
 distibench.env: distitest.env
 
 distibench.run:
-	docker run --rm --net=host \
+	$(DOCKER) run --rm --net=host \
 	           -v $(SRCROOT):$(SRCROOT_D) \
  	           -w $(SRCROOT_D) \
 	           -e DEV_UID=$(DOCKER_DEV_UID) \

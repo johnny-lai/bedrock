@@ -23,21 +23,21 @@ clean:
 dist: image-dist image-testdb
 
 distrun: distutest.env
-	docker run --rm \
+	$(DOCKER) run --rm \
 	           --link $(APP_NAME)-testdb:$(APP_NAME)-db \
              -p 8080:8080 \
 	           -v $(APP_SECRETS_ROOT):/etc/secrets \
 	           $(APP_DOCKER_LABEL_COMMIT)
 
 distrun.env: distutest.env
-	docker run --rm \
+	$(DOCKER) run --rm \
 	           --link $(APP_NAME)-testdb:$(APP_NAME)-db \
 	           -v $(APP_SECRETS_ROOT):/etc/secrets \
 	           $(APP_DOCKER_LABEL_COMMIT) \
              env
 
 distrun.sh:
-	docker run --rm \
+	$(DOCKER) run --rm \
 	           --link $(APP_NAME)-testdb:$(APP_NAME)-db \
 	           -v $(APP_SECRETS_ROOT):/etc/secrets \
 	           --entrypoint sh \
@@ -45,7 +45,7 @@ distrun.sh:
 	           $(APP_DOCKER_LABEL_COMMIT)
 
 distbuild:
-	docker run --rm \
+	$(DOCKER) run --rm \
 	           $(DOCKER_OPTS) \
              $(DOCKER_DEVIMAGE) \
 	           make build
@@ -57,9 +57,9 @@ distpublish: image-dist.publish image-testdb.publish
 deploy: image-testdb distutest image-dist distpush distitest
 
 image-testdb:
-	docker build -f $(DOCKER_ROOT)/testdb/Dockerfile -t $(TESTDB_DOCKER_LABEL_COMMIT) $(SRCROOT)
-	docker tag -f $(TESTDB_DOCKER_LABEL_COMMIT) $(TESTDB_DOCKER_LABEL)
-	docker tag -f $(TESTDB_DOCKER_LABEL_COMMIT) $(TESTDB_DOCKER_LABEL_VERSION)
+	$(DOCKER) build -f $(DOCKER_ROOT)/testdb/Dockerfile -t $(TESTDB_DOCKER_LABEL_COMMIT) $(SRCROOT)
+	$(DOCKER) tag -f $(TESTDB_DOCKER_LABEL_COMMIT) $(TESTDB_DOCKER_LABEL)
+	$(DOCKER) tag -f $(TESTDB_DOCKER_LABEL_COMMIT) $(TESTDB_DOCKER_LABEL_VERSION)
 
 image-testdb.push:
 	if [ "$(APP_DOCKER_PUSH)" != "no" ]; then \
@@ -73,9 +73,9 @@ image-testdb.publish:
 	fi
 
 image-dist: distbuild
-	docker build -f $(DOCKER_ROOT)/dist/Dockerfile -t $(APP_DOCKER_LABEL_COMMIT) $(SRCROOT)
-	docker tag -f $(APP_DOCKER_LABEL_COMMIT) $(APP_DOCKER_LABEL)
-	docker tag -f $(APP_DOCKER_LABEL_COMMIT) $(APP_DOCKER_LABEL_VERSION)
+	$(DOCKER) build -f $(DOCKER_ROOT)/dist/Dockerfile -t $(APP_DOCKER_LABEL_COMMIT) $(SRCROOT)
+	$(DOCKER) tag -f $(APP_DOCKER_LABEL_COMMIT) $(APP_DOCKER_LABEL)
+	$(DOCKER) tag -f $(APP_DOCKER_LABEL_COMMIT) $(APP_DOCKER_LABEL_VERSION)
 
 image-dist.push:
 	if [ "$(APP_DOCKER_PUSH)" != "no" ]; then \
