@@ -54,7 +54,7 @@ distpush: image-dist.push image-testdb.push
 
 distpublish: image-dist.publish image-testdb.publish
 
-deploy: image-testdb distutest image-dist distpush distitest
+deploy: dist distutest distpush distitest
 
 image-testdb:
 	$(DOCKER) build -f $(DOCKER_ROOT)/testdb/Dockerfile -t $(TESTDB_DOCKER_LABEL_COMMIT) $(SRCROOT)
