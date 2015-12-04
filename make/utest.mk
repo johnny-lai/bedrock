@@ -6,6 +6,7 @@ distutest: distutest.env distutest.run
 distutest.env:
 	-$(DOCKER) rm -f $(APP_NAME)-testdb
 	$(DOCKER) run -d --name $(APP_NAME)-testdb $(APP_DOCKER_LABEL)-testdb
+	sleep 5
 
 distutest.run:
 	$(DOCKER) run --rm \
