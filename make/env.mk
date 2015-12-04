@@ -44,6 +44,7 @@ DOCKER_OPTS ?= -v $(SRCROOT):$(SRCROOT_D) \
                -v $(KUBERNETES_CONFIG):/root/.kube/config \
                -v $(APP_SECRETS_ROOT):$(APP_SECRETS_ROOT_D) \
                -w $(SRCROOT_D) \
+               -e "DOCKER=$(DOCKER)" \
 							 -e BUILD_ROOT=$(BUILD_ROOT_D) \
                -e APP_SECRETS_ROOT=$(APP_SECRETS_ROOT_D) \
 							 -e BUILD_NUMBER=$(BUILD_NUMBER) \
