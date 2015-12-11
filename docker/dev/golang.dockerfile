@@ -1,4 +1,4 @@
-FROM golang
+FROM golang:1.5
 
 # Install go
 RUN go get -u github.com/derekparker/delve/cmd/dlv && \
@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y lsb-release vim sudo
 RUN curl -sSL https://get.kismatic.com/kubernetes/master.sh | sh
 
 # Extra tooling
-RUN apt-get install -y telnet jq
+RUN apt-get install -y vim telnet jq
 
 COPY docker/dev/sudoers /etc/sudoers
 
