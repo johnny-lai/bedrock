@@ -11,8 +11,8 @@ import (
 
 var version = "unset"
 
-func bedrockRoot(c *cli.Context) (string, error) {
-  root := c.GlobalString("base")
+func fixturesRoot(c *cli.Context) (string, error) {
+  root := c.GlobalString("fixtures")
   log.Print(root)
   if root == "" {
     root = filepath.Dir(os.Args[0])
@@ -54,9 +54,8 @@ func main() {
 	app.Usage = "A microservice structure for Go"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name:  "base",
-			Usage: "Location of bedrock",
-      EnvVar: "BEDROCK_ROOT",
+			Name:  "fixtures",
+			Usage: "Location of fixtures",
 		},
 	}
 	app.Commands = []cli.Command{
@@ -97,8 +96,8 @@ func main() {
           log.Fatal(err)
         }
 
-        root, _ := bedrockRoot(c)
-        fixture_root := filepath.Join(root, "fixtures", fixture)
+        fixtures_root, _ := fixturesRoot(c)
+        fixture_root := filepath.Join(fixtures_root, fixture)
         finfo, err := os.Stat(fixture_root)
         if err != nil || !finfo.Mode().IsDir() {
           log.Fatalf("Unknown fixture %s specified. Expected %s to be a directory.", fixture, fixture_root)

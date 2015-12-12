@@ -1,31 +1,17 @@
-# GO flags
-ifeq ($(APP_GO_LINKING), static)
-	GO_ENV ?= GO15VENDOREXPERIMENT=1 CGO_ENABLED=0
-	GO_CFLAGS ?= -a
-else
-	GO_ENV ?= GO15VENDOREXPERIMENT=1
-	GO_CFLAGS ?=
-endif
+build: deps $(APP)
 
-build: deps
-	$(GO_ENV) go build $(GO_CFLAGS) \
-		-o $(BUILD_ROOT)/$(APP_NAME) \
-		-ldflags "-X main.version=$(VERSION)-$(COMMIT)" \
-		$(APP_GO_SOURCES)
+$(APP): $(BUILD_ROOT)
 
 clean:
-	go clean
-	git clean -ffxd vendor
-	rm $(BEDROCK)
-	rm -f $(BUILD_ROOT)/$(APP_NAME)
-	rm -rf $(TMP_ROOT)
+	rm -f $(BEDROCK)
+	rm -f $(APP)
 
 dist: image-dist image-testdb
 
 distrun: distutest.env
 	$(DOCKER) run --rm \
 	           --link $(APP_NAME)-testdb:$(APP_NAME)-db \
-             -p 8080:8080 \
+               -p 8080:8080 \
 	           -v $(APP_SECRETS_ROOT):/etc/secrets \
 	           $(APP_DOCKER_LABEL_COMMIT)
 
@@ -47,7 +33,7 @@ distrun.sh:
 distbuild:
 	$(DOCKER) run --rm \
 	           $(DOCKER_OPTS) \
-             $(DOCKER_DEVIMAGE) \
+	           $(DOCKER_DEVIMAGE) \
 	           make build
 
 distpush: image-dist.push image-testdb.push

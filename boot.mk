@@ -2,6 +2,7 @@ default: build
 
 BEDROCK_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 include $(BEDROCK_ROOT)/make/env.mk
+include $(BEDROCK_ROOT)/make/bedrock.mk
 include $(BEDROCK_ROOT)/make/build.mk
 include $(BEDROCK_ROOT)/make/itest.mk
 include $(BEDROCK_ROOT)/make/utest.mk
