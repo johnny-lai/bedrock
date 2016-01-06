@@ -28,17 +28,17 @@ func (s *GormService) Db() (gorm.DB, error) {
 }
 
 // Configures the GormService
-func (s *GormService) Configure(app *Application) error {
+func (s *GormService) Configure(app *ServiceApplication) error {
 	return app.BindConfigAt(&s.Config, "db")
 }
 
 // Builds GormService
-func (s *GormService) Build(app *Application) error {
+func (s *GormService) Build(app *ServiceApplication) error {
 	return nil
 }
 
 // Generates a gin route handler for health checks that will ping the database
-func (s *GormService) HealthHandler(app *Application) func(*gin.Context) {
+func (s *GormService) HealthHandler(app *ServiceApplication) func(*gin.Context) {
 	return func(c *gin.Context) {
 		db, _ := s.Db()
 

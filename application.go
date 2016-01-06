@@ -3,35 +3,18 @@ package bedrock
 import (
 	"bytes"
 	"errors"
-	"fmt"
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
-	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v2"
 	"os"
 	"path"
 	"text/template"
 )
 
-// AppServicer is the expected interface of Servicer implementations.
-type AppServicer interface {
-	Configure(*Application) error
-	Migrate(*Application) error
-	Build(*Application) error
-	Run(*Application) error
-}
-
 // Application
 type Application struct {
 	cli.App
-
 	ConfigBytes []byte
-
-	Log      *logrus.Logger
-	Servicer AppServicer
-	Engine   *gin.Engine
-
-	OnException func(*gin.Context, error)
 }
 
 // Reads the specified config file. Note that bedrock.Application will process
@@ -86,27 +69,37 @@ func (app *Application) BindConfig(config interface{}) error {
 func (app *Application) BindConfigAt(config interface{}, key string) error {
 	var full = make(map[interface{}]interface{})
 	if err := app.BindConfig(&full); err != nil {
-		app.Log.Fatal(err)
+		log.Fatal(err)
 		return err
 	}
 	d, err := yaml.Marshal(full[key])
 	if err != nil {
-		app.Log.Fatal(err)
+		log.Fatal(err)
 		return err
 	}
 
 	return yaml.Unmarshal([]byte(d), config)
 }
 
-func (app *Application) LogException(c *gin.Context, err error) {
-	app.Log.WithFields(logrus.Fields{
-		"trace": StackTrace(),
-	}).Error(err)
+func (app *Application) InitFromCliContext(c *cli.Context) error {
+	// Set config
+	config := c.GlobalString("config")
+	if err := app.ReadConfigFile(config); err != nil {
+		return err
+	}
+
+	// Set log level
+	if c.GlobalBool("debug") {
+		log.SetLevel(log.DebugLevel)
+		log.AddHook(new(DebugLoggerHook))
+	} else {
+		log.SetLevel(log.InfoLevel)
+	}
+
+	return nil
 }
 
 func (app *Application) initCli() {
-	svc := app.Servicer
-
 	app.App = *cli.NewApp()
 	app.App.Flags = []cli.Flag{
 		cli.StringFlag{
@@ -114,75 +107,17 @@ func (app *Application) initCli() {
 			Value: "config.yaml",
 			Usage: "config file to use",
 		},
-	}
-
-	app.App.Commands = []cli.Command{
-		{
-			Name:  "env",
-			Usage: "Print the configurations",
-			Action: func(c *cli.Context) {
-				if err := app.ReadConfigFile(c.GlobalString("config")); err != nil {
-					app.Log.Fatal(err)
-					return
-				}
-
-				var config interface{}
-				if err := app.BindConfig(&config); err != nil {
-					app.Log.Fatal(err)
-					return
-				}
-
-				d, err := yaml.Marshal(config)
-				if err != nil {
-					app.Log.Fatalf("error: %v", err)
-				}
-				fmt.Printf(string(d))
-			},
-		},
-		{
-			Name:  "server",
-			Usage: "Run the http server",
-			Action: func(c *cli.Context) {
-				if err := app.ReadConfigFile(c.GlobalString("config")); err != nil {
-					app.Log.Fatal(err)
-					return
-				}
-
-				if err := svc.Configure(app); err != nil {
-					app.Log.Fatal(err)
-				}
-
-				if err := svc.Build(app); err != nil {
-					app.Log.Fatal(err)
-				}
-
-				svc.Run(app)
-			},
-		},
-		{
-			Name:  "migrate",
-			Usage: "Perform database migrations",
-			Action: func(c *cli.Context) {
-				if err := svc.Migrate(app); err != nil {
-					app.Log.Fatal(err)
-				}
-			},
+		cli.BoolFlag{
+			Name:  "debug, d",
+			Usage: "turns on debugging",
 		},
 	}
+	app.App.Commands = []cli.Command{}
 }
 
-// Creates a new application with the specified AppServicer
-func NewApp(svc AppServicer) *Application {
+// Creates a new application
+func NewApplication() *Application {
 	app := new(Application)
-
-	app.Log = logrus.New()
-	app.Log.Formatter = &logrus.JSONFormatter{}
-
-	app.Servicer = svc
-	app.Engine = gin.Default()
-
-	app.OnException = app.LogException
-
 	app.initCli()
 
 	return app

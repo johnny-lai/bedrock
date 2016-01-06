@@ -3,6 +3,7 @@ package bedrock
 import (
 	"errors"
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"github.com/airbrake/gobrake"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -10,7 +11,7 @@ import (
 
 // Airbrake Config
 type AirbrakeConfig struct {
-	Host string
+	Host       string
 	ProjectID  int64
 	ProjectKey string
 }
@@ -33,7 +34,7 @@ func (s *AirbrakeService) Configure(app *Application) error {
 // 2. Replace app.OnException with a version that writes the airbrak in addition
 //    to logging
 // 3. Sets the Notifier object that will be used to push notices to Airbrake
-func (s *AirbrakeService) Build(app *Application) error {
+func (s *AirbrakeService) Build(app *ServiceApplication) error {
 	s.Notifier = gobrake.NewNotifier(s.Config.ProjectID, s.Config.ProjectKey)
 	s.Notifier.SetHost(s.Config.Host)
 	s.Notifier.AddFilter(func(notice *gobrake.Notice) *gobrake.Notice {
@@ -48,19 +49,19 @@ func (s *AirbrakeService) Build(app *Application) error {
 
 // Generates a gin route handler for triggering a panic. This is used for testing
 // that the recovery works.
-func (s *AirbrakeService) PanicHandler(app *Application) func(*gin.Context) {
+func (s *AirbrakeService) PanicHandler(app *ServiceApplication) func(*gin.Context) {
 	return func(c *gin.Context) {
 		panic("Panicking")
 	}
 }
 
 // Generates a gin middleware for recovering from panics.
-func (s *AirbrakeService) RecoveryMiddleware(app *Application) func(*gin.Context) {
+func (s *AirbrakeService) RecoveryMiddleware(app *ServiceApplication) func(*gin.Context) {
 	return func(c *gin.Context) {
 		defer func() {
 			if rval := recover(); rval != nil {
 				rvalStr := fmt.Sprint(rval)
-				app.Log.Errorf("recovering from:%s at:%s", rvalStr, c.Request.URL)
+				log.Errorf("recovering from:%s at:%s", rvalStr, c.Request.URL)
 
 				err := errors.New(rvalStr)
 				app.OnException(c, err)
@@ -73,7 +74,7 @@ func (s *AirbrakeService) RecoveryMiddleware(app *Application) func(*gin.Context
 }
 
 // The OnExeption replacement for app
-func (s *AirbrakeService) OnException(app *Application) func(*gin.Context, error) {
+func (s *AirbrakeService) OnException(app *ServiceApplication) func(*gin.Context, error) {
 	return func(c *gin.Context, err error) {
 		app.LogException(c, err)
 		s.Notifier.Notify(err, c.Request)

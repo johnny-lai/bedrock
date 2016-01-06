@@ -18,12 +18,12 @@ type NewRelicService struct {
 }
 
 // Configures NewRelicService
-func (s *NewRelicService) Configure(app *Application) error {
+func (s *NewRelicService) Configure(app *ServiceApplication) error {
 	return app.BindConfigAt(&s.Config, "newrelic")
 }
 
 // Builds NewRelicService
-func (s *NewRelicService) Build(app *Application) error {
+func (s *NewRelicService) Build(app *ServiceApplication) error {
 	app.Engine.Use(newrelic.NewRelic(s.Config.LicenseKey, s.Config.AppName, s.Config.Verbose))
 	return nil
 }
