@@ -24,7 +24,7 @@ type AirbrakeService struct {
 }
 
 // Configures the AirbrakeService
-func (s *AirbrakeService) Configure(app *Application) error {
+func (s *AirbrakeService) Configure(app *ServiceApplication) error {
 	return app.BindConfigAt(&s.Config, "airbrake")
 }
 
