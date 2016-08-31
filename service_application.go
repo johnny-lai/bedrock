@@ -103,10 +103,6 @@ func (app *ServiceApplication) LogException(c *gin.Context, err error) {
 func NewServiceApplication(svc AppServicer) *ServiceApplication {
 	app := new(ServiceApplication)
 
-	log.SetFormatter(&log.JSONFormatter{})
-
-	app.initCli()
-
 	app.Servicer = svc
 	app.Engine = gin.Default()
 
