@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	"github.com/airbrake/gobrake"
 	"github.com/gin-gonic/gin"
+	"gopkg.in/airbrake/gobrake.v2"
 	"net/http"
 )
 

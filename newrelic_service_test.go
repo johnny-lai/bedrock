@@ -9,13 +9,13 @@ import (
 
 var _ = Describe("NewRelicService", func() {
 	var (
-		app *Application
+		app *ServiceApplication
 		svc *NewRelicService
 	)
 
 	BeforeEach(func() {
 		gin.SetMode(gin.TestMode)
-		app = new(Application)
+		app = new(ServiceApplication)
 		svc = new(NewRelicService)
 	})
 
