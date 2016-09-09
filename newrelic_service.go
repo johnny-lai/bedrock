@@ -1,11 +1,13 @@
 package bedrock
 
 import (
+	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/contrib/newrelic"
 )
 
 // NewRelic Config
 type NewRelicConfig struct {
+	Enabled    bool
 	LicenseKey string
 	AppName    string
 	Verbose    bool
@@ -24,6 +26,11 @@ func (s *NewRelicService) Configure(app *ServiceApplication) error {
 
 // Builds NewRelicService
 func (s *NewRelicService) Build(app *ServiceApplication) error {
+	if !s.Config.Enabled {
+		log.Info("NewRelicService is disabled")
+		return nil
+	}
+
 	app.Engine.Use(newrelic.NewRelic(s.Config.LicenseKey, s.Config.AppName, s.Config.Verbose))
 	return nil
 }

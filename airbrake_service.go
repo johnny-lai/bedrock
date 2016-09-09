@@ -11,6 +11,7 @@ import (
 
 // Airbrake Config
 type AirbrakeConfig struct {
+	Enabled    bool
 	Host       string
 	ProjectID  int64
 	ProjectKey string
@@ -35,6 +36,11 @@ func (s *AirbrakeService) Configure(app *ServiceApplication) error {
 //    to logging
 // 3. Sets the Notifier object that will be used to push notices to Airbrake
 func (s *AirbrakeService) Build(app *ServiceApplication) error {
+	if !s.Config.Enabled {
+		log.Info("AirbrakeService is disabled")
+		return nil
+	}
+
 	s.Notifier = gobrake.NewNotifier(s.Config.ProjectID, s.Config.ProjectKey)
 	s.Notifier.SetHost(s.Config.Host)
 	s.Notifier.AddFilter(func(notice *gobrake.Notice) *gobrake.Notice {

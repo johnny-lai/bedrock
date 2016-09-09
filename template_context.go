@@ -56,3 +56,11 @@ func (c *TemplateContext) Scanln(prompt string) string {
 	fmt.Scanln(&ret)
 	return ret
 }
+
+func (c *TemplateContext) Default(def string, data string) string {
+	if len(data) > 0 {
+		return data
+	} else {
+		return def
+	}
+}
