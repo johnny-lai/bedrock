@@ -169,7 +169,7 @@ func (app *Application) parseLogFormatter(formatter string) (log.Formatter, erro
 	case "json":
 		return &log.JSONFormatter{}, nil
 	case "text":
-		return &log.TextFormatter{}, nil
+		return &LogTextFormatter{}, nil
 	default:
 		return nil, fmt.Errorf("Unknown log formatter %s requested", formatter)
 	}
