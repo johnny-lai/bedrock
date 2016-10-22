@@ -24,6 +24,7 @@ type Application struct {
 
 type Options struct {
 	Config string
+	Debug  bool
 }
 
 type Config struct {
@@ -102,6 +103,7 @@ func (app *Application) BindConfigAt(config interface{}, key string) error {
 
 func (app *Application) InitFromCliContext(c *cli.Context) error {
 	app.Options.Config = c.GlobalString("config")
+	app.Options.Debug = c.GlobalBool("debug")
 
 	return nil
 }
@@ -121,7 +123,7 @@ func (app *Application) Configure() error {
 
 	// Set log level
 	var level = log.InfoLevel
-	if c.GlobalBool("debug") {
+	if app.Options.Debug {
 		level = log.DebugLevel
 	} else if app.Config.Log.Level != "" {
 		level, err = log.ParseLevel(app.Config.Log.Level)
