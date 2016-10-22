@@ -17,8 +17,13 @@ import (
 // Application
 type Application struct {
 	cli.App
+	Options
+	Config
 	ConfigBytes []byte
-	Config      Config
+}
+
+type Options struct {
+	Config string
 }
 
 type Config struct {
@@ -96,11 +101,16 @@ func (app *Application) BindConfigAt(config interface{}, key string) error {
 }
 
 func (app *Application) InitFromCliContext(c *cli.Context) error {
+	app.Options.Config = c.GlobalString("config")
+
+	return nil
+}
+
+func (app *Application) Configure() error {
 	var err error
 
 	// Set config
-	config := c.GlobalString("config")
-	if err = app.ReadConfigFile(config); err != nil {
+	if err = app.ReadConfigFile(app.Options.Config); err != nil {
 		return err
 	}
 
