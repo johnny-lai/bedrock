@@ -150,11 +150,13 @@ func (app *Application) Configure() error {
 	}
 
 	// Add syslog
-	syslog_hook, err := logrus_syslog.NewSyslogHook("", "", syslog.LOG_INFO, app.Config.Log.SyslogName)
-	if err == nil {
-		log.AddHook(syslog_hook)
-	} else {
-		log.Warnf("Failed to use syslog: %v", err)
+	if app.Config.Log.SyslogName != "" {
+		syslog_hook, err := logrus_syslog.NewSyslogHook("", "", syslog.LOG_INFO, app.Config.Log.SyslogName)
+		if err == nil {
+			log.AddHook(syslog_hook)
+		} else {
+			log.Warnf("Failed to use syslog: %v", err)
+		}
 	}
 
 	return nil
