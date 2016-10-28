@@ -16,7 +16,7 @@ import (
 
 // Application
 type Application struct {
-	cli.App
+	*cli.App
 	Options
 	Config
 	ConfigBytes []byte
@@ -162,9 +162,9 @@ func (app *Application) Configure() error {
 	return nil
 }
 
-func (app *Application) initCli() {
-	app.App = *cli.NewApp()
-	app.App.Flags = []cli.Flag{
+func NewCliApp() *cli.App {
+	app := cli.NewApp()
+	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  "config, c",
 			Value: "config.yaml",
@@ -175,7 +175,7 @@ func (app *Application) initCli() {
 			Usage: "turns on debugging",
 		},
 	}
-	app.App.Commands = []cli.Command{}
+	return app
 }
 
 func (app *Application) parseLogFormatter(formatter string) (log.Formatter, error) {
@@ -192,7 +192,7 @@ func (app *Application) parseLogFormatter(formatter string) (log.Formatter, erro
 // Creates a new application
 func NewApplication() *Application {
 	app := new(Application)
-	app.initCli()
+	app.App = NewCliApp()
 
 	return app
 }
