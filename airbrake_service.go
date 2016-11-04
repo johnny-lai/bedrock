@@ -73,7 +73,6 @@ func (s *AirbrakeService) RecoveryMiddleware(app *ServiceApplication) func(*gin.
 				app.OnException(c, err)
 				c.JSON(http.StatusInternalServerError, Errorf("%v", err))
 			}
-			defer s.Notifier.Flush()
 		}()
 		c.Next()
 	}
