@@ -3,6 +3,7 @@ package bedrock
 import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/contrib/newrelic"
+	"github.com/gin-gonic/gin"
 )
 
 // NewRelic Config
@@ -19,18 +20,13 @@ type NewRelicService struct {
 	Config NewRelicConfig
 }
 
-// Configures NewRelicService
-func (s *NewRelicService) Configure(app *ServiceApplication) error {
-	return app.BindConfigAt(&s.Config, "newrelic")
-}
-
 // Builds NewRelicService
-func (s *NewRelicService) Build(app *ServiceApplication) error {
+func (s *NewRelicService) Build(r *gin.Engine) error {
 	if !s.Config.Enabled {
 		log.Info("NewRelicService is disabled")
 		return nil
 	}
 
-	app.Engine.Use(newrelic.NewRelic(s.Config.LicenseKey, s.Config.AppName, s.Config.Verbose))
+	r.Use(newrelic.NewRelic(s.Config.LicenseKey, s.Config.AppName, s.Config.Verbose))
 	return nil
 }

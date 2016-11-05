@@ -8,7 +8,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
 	"io/ioutil"
 	"net/http"
 )
@@ -55,75 +54,22 @@ func (cfg *TLSConfig) Load() error {
 		return mysql.RegisterTLSConfig(cfg.Name, &tlsConfig)
 	}
 
-  return nil
-}
-
-// Gorm Service. Add this to your AppService and call Configure and Build to
-// add Gorm DB support to your AppServicer
-type GormService struct {
-	DbConfig  mysql.Config
-	TLSConfig TLSConfig
-
-	ConnectionString string
-}
-
-func (s *GormService) loadTLSConfig(app *ServiceApplication) error {
-	err := app.BindConfigAt(&s.TLSConfig, "tlsconfig")
-	if err != nil {
-		return err
-	}
-
-	return s.TLSConfig.Load()
-}
-
-// Loads the config
-func (s *GormService) loadDbConfig(app *ServiceApplication) error {
-	err := app.BindConfigAt(&s.DbConfig, "db")
-	if err != nil {
-		return err
-	}
-
-	s.ConnectionString = s.DbConfig.FormatDSN()
-
-	fmt.Printf("dsnxx=%s", s.ConnectionString)
-	log.Debugf("dsn=%s", s.ConnectionString)
-
-	return nil
-}
-
-// Returns a DB connection
-func (s *GormService) Db() (*gorm.DB, error) {
-	return gorm.Open("mysql", s.ConnectionString)
-}
-
-// Configures the GormService
-func (s *GormService) Configure(app *ServiceApplication) error {
-	if err := s.loadDbConfig(app); err != nil {
-		return err
-	}
-
-	if err := s.loadTLSConfig(app); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// Builds GormService
-func (s *GormService) Build(app *ServiceApplication) error {
 	return nil
 }
 
 // Generates a gin route handler for health checks that will ping the database
-func (s *GormService) HealthHandler(app *ServiceApplication) func(*gin.Context) {
+func HealthHandler(s ConnectionHandler) func(*gin.Context) {
 	return func(c *gin.Context) {
-		db, _ := s.Db()
+		db, _ := s.DB()
 
 		err := db.Exec("DO 1;").Error
 		if err == nil {
 			c.JSON(http.StatusOK, true)
 		} else {
-			app.OnException(c, err)
+			log.WithFields(log.Fields{
+				"trace": StackTrace(),
+			}).Error(err)
+
 			c.JSON(http.StatusInternalServerError, Errorf("%v", err))
 		}
 	}

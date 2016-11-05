@@ -1,25 +1,20 @@
 package bedrock
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	logrus_syslog "github.com/Sirupsen/logrus/hooks/syslog"
 	"github.com/codegangsta/cli"
 	"gopkg.in/yaml.v2"
 	"log/syslog"
-	"os"
-	"path"
-	"text/template"
 )
 
 // Application
 type Application struct {
 	*cli.App
 	Options
-	Config
-	ConfigBytes []byte
+	Config      ApplicationConfig
+	ConfigBytes ConfigBytes
 }
 
 type Options struct {
@@ -27,7 +22,7 @@ type Options struct {
 	Debug  bool
 }
 
-type Config struct {
+type ApplicationConfig struct {
 	Log LogConfig `yaml:"log"`
 }
 
@@ -37,30 +32,17 @@ type LogConfig struct {
 	SyslogName string `yaml:"syslog_name"`
 }
 
-// Reads the specified config file. Note that bedrock.Application will process
-// the config file, using text/template, with the following extra functions:
-//
-//     {{.Env "ENVIRONMENT_VARIABLE"}}
-//     {{.Cat "File name"}}
-//     {{.Base64 "a string"}}
+func (app *Application) UnmarshalConfigFile(config interface{}, bytes []byte) error {
+	return yaml.Unmarshal(bytes, config)
+}
+
 func (app *Application) ReadConfigFile(file string) error {
-	if _, err := os.Stat(file); err != nil {
-		return errors.New("config path not valid")
-	}
-
-	tmpl, err := template.New(path.Base(file)).ParseFiles(file)
+	b, err := ReadConfigFile(file)
 	if err != nil {
 		return err
 	}
 
-	var configBytes bytes.Buffer
-	tc := TemplateContext{}
-	err = tmpl.Execute(&configBytes, &tc)
-	if err != nil {
-		return err
-	}
-
-	app.ConfigBytes = configBytes.Bytes()
+	app.ConfigBytes = b
 	return nil
 }
 
