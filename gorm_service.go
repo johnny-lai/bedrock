@@ -22,22 +22,7 @@ type TLSConfig struct {
 	ClientCert         string `yaml:"cert"`
 }
 
-// Gorm Service. Add this to your AppService and call Configure and Build to
-// add Gorm DB support to your AppServicer
-type GormService struct {
-	DbConfig  mysql.Config
-	TLSConfig TLSConfig
-
-	ConnectionString string
-}
-
-func (s *GormService) loadTLSConfig(app *ServiceApplication) error {
-	err := app.BindConfigAt(&s.TLSConfig, "tlsconfig")
-	if err != nil {
-		return err
-	}
-
-	cfg := s.TLSConfig
+func (cfg *TLSConfig) Load() error {
 	if len(cfg.Name) > 0 {
 		var tlsConfig tls.Config
 
@@ -67,10 +52,28 @@ func (s *GormService) loadTLSConfig(app *ServiceApplication) error {
 			tlsConfig.Certificates = clientCert
 		}
 
-		mysql.RegisterTLSConfig(cfg.Name, &tlsConfig)
+		return mysql.RegisterTLSConfig(cfg.Name, &tlsConfig)
 	}
 
-	return nil
+  return nil
+}
+
+// Gorm Service. Add this to your AppService and call Configure and Build to
+// add Gorm DB support to your AppServicer
+type GormService struct {
+	DbConfig  mysql.Config
+	TLSConfig TLSConfig
+
+	ConnectionString string
+}
+
+func (s *GormService) loadTLSConfig(app *ServiceApplication) error {
+	err := app.BindConfigAt(&s.TLSConfig, "tlsconfig")
+	if err != nil {
+		return err
+	}
+
+	return s.TLSConfig.Load()
 }
 
 // Loads the config
