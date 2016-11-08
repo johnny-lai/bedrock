@@ -40,3 +40,16 @@ func ReadConfigFile(file string) (ConfigBytes, error) {
 func (c ConfigBytes) Unmarshal(dst interface{}) error {
 	return yaml.Unmarshal(c, dst)
 }
+
+func (c ConfigBytes) UnmarshalAt(dst interface{}, key string) error {
+	var full = make(map[interface{}]interface{})
+	if err := c.Unmarshal(&full); err != nil {
+		return err
+	}
+	d, err := yaml.Marshal(full[key])
+	if err != nil {
+		return err
+	}
+
+	return yaml.Unmarshal([]byte(d), dst)
+}
