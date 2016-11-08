@@ -32,6 +32,46 @@ type LogConfig struct {
 	SyslogName string `yaml:"syslog_name"`
 }
 
+func (lcfg *LogConfig) Load() (err error) {
+	// Set log level
+	var level = log.InfoLevel
+	if lcfg.Level != "" {
+		level, err = log.ParseLevel(lcfg.Level)
+		if err != nil {
+			log.Warnf("Failed to parse log level: %v", err)
+		}
+	}
+	log.SetLevel(level)
+
+	// Set log formatter
+	var formatter = "text"
+	if lcfg.Formatter != "" {
+		formatter = lcfg.Formatter
+	}
+	logFormatter, err := ParseLogFormatter(formatter)
+	if err != nil {
+		return err
+	}
+	log.SetFormatter(logFormatter)
+
+	// Add DebugLoggerHook if we are in debug mode
+	if log.GetLevel() == log.DebugLevel {
+		log.AddHook(new(DebugLoggerHook))
+	}
+
+	// Add syslog
+	if lcfg.SyslogName != "" {
+		syslog_hook, err := logrus_syslog.NewSyslogHook("", "", syslog.LOG_INFO, lcfg.SyslogName)
+		if err == nil {
+			log.AddHook(syslog_hook)
+		} else {
+			log.Warnf("Failed to use syslog: %v", err)
+		}
+	}
+
+  return nil
+}
+
 func (app *Application) UnmarshalConfigFile(config interface{}, bytes []byte) error {
 	return yaml.Unmarshal(bytes, config)
 }
@@ -120,7 +160,7 @@ func (app *Application) Configure() error {
 	if app.Config.Log.Formatter != "" {
 		formatter = app.Config.Log.Formatter
 	}
-	logFormatter, err := app.parseLogFormatter(formatter)
+	logFormatter, err := ParseLogFormatter(formatter)
 	if err != nil {
 		return err
 	}
@@ -160,7 +200,7 @@ func NewCliApp() *cli.App {
 	return app
 }
 
-func (app *Application) parseLogFormatter(formatter string) (log.Formatter, error) {
+func ParseLogFormatter(formatter string) (log.Formatter, error) {
 	switch formatter {
 	case "json":
 		return &log.JSONFormatter{}, nil
