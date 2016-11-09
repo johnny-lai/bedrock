@@ -23,7 +23,11 @@ func Errorf(format string, params ...interface{}) *Error {
 
 // This function ensure Error now meets the error interface
 func (e *Error) Error() string {
-	return fmt.Sprintf("%v: %v", e.Message, e.Description)
+  if e.Description == "" {
+    return e.Message
+  } else {
+    return fmt.Sprintf("%v: %v", e.Message, e.Description)
+  }
 }
 
 // Sets the Message
