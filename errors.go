@@ -15,6 +15,9 @@ type Error struct {
 func Errorf(format string, params ...interface{}) *Error {
 	ret := new(Error)
 	ret.Message = fmt.Sprintf(format, params...)
+  if Mode() == DebugMode {
+    ret.Description = StackTrace()
+  }
 	return ret
 }
 
