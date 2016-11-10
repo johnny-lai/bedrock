@@ -15,19 +15,19 @@ type Error struct {
 func Errorf(format string, params ...interface{}) *Error {
 	ret := new(Error)
 	ret.Message = fmt.Sprintf(format, params...)
-  if Mode() == DebugMode {
-    ret.Description = StackTrace()
-  }
+	if Mode() == DebugMode {
+		ret.Description = StackTrace()
+	}
 	return ret
 }
 
 // This function ensure Error now meets the error interface
 func (e *Error) Error() string {
-  if e.Description == "" {
-    return e.Message
-  } else {
-    return fmt.Sprintf("%v: %v", e.Message, e.Description)
-  }
+	if e.Description == "" {
+		return e.Message
+	} else {
+		return fmt.Sprintf("%v: %v", e.Message, e.Description)
+	}
 }
 
 // Sets the Message

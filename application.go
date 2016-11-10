@@ -69,7 +69,7 @@ func (lcfg *LogConfig) Load() (err error) {
 		}
 	}
 
-  return nil
+	return nil
 }
 
 func (app *Application) UnmarshalConfigFile(config interface{}, bytes []byte) error {

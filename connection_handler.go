@@ -17,6 +17,7 @@ type MySQLConnectionHandler struct {
 
 // Returns a DB connection
 func (c *MySQLConnectionHandler) DB() (*gorm.DB, error) {
+	// TODO: Re-open DB if needed
 	if c.db != nil {
 		return c.db, nil
 	}
