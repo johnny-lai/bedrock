@@ -9,20 +9,21 @@ type ConnectionHandler interface {
 	Close()
 }
 
-type MySQLConnectionHandler struct {
+type SQLConnectionHandler struct {
+	Dialect string
 	DSN     string
 	LogMode bool
 	db      *gorm.DB
 }
 
 // Returns a DB connection
-func (c *MySQLConnectionHandler) DB() (*gorm.DB, error) {
+func (c *SQLConnectionHandler) DB() (*gorm.DB, error) {
 	// TODO: Re-open DB if needed
 	if c.db != nil {
 		return c.db, nil
 	}
 
-	db, err := gorm.Open("mysql", c.DSN)
+	db, err := gorm.Open(c.Dialect, c.DSN)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +33,7 @@ func (c *MySQLConnectionHandler) DB() (*gorm.DB, error) {
 	return db, nil
 }
 
-func (c *MySQLConnectionHandler) Close() {
+func (c *SQLConnectionHandler) Close() {
 	if c.db != nil {
 		c.db.Close()
 	}
