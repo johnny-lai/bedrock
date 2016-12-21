@@ -9,6 +9,9 @@ import (
 	"log/syslog"
 )
 
+// Global private variable to ensure we don't add the log hooks more than once
+var logHooksAdded = false
+
 // Application
 type Application struct {
 	*cli.App
@@ -54,20 +57,24 @@ func (lcfg *LogConfig) Load() (err error) {
 	}
 	log.SetFormatter(logFormatter)
 
-	// Add DebugLoggerHook if we are in debug mode
-	if log.GetLevel() == log.DebugLevel {
-		log.AddHook(new(DebugLoggerHook))
-	}
+  if logHooksAdded == false {
+    // Add DebugLoggerHook if we are in debug mode
+    if log.GetLevel() == log.DebugLevel {
+      log.AddHook(new(DebugLoggerHook))
+    }
 
-	// Add syslog
-	if lcfg.SyslogName != "" {
-		syslog_hook, err := logrus_syslog.NewSyslogHook("", "", syslog.LOG_INFO, lcfg.SyslogName)
-		if err == nil {
-			log.AddHook(syslog_hook)
-		} else {
-			log.Warnf("Failed to use syslog: %v", err)
-		}
-	}
+    // Add syslog
+    if lcfg.SyslogName != "" {
+      syslog_hook, err := logrus_syslog.NewSyslogHook("", "", syslog.LOG_INFO, lcfg.SyslogName)
+      if err == nil {
+        log.AddHook(syslog_hook)
+      } else {
+        log.Warnf("Failed to use syslog: %v", err)
+      }
+    }
+
+    logHooksAdded = true
+  }
 
 	return nil
 }
