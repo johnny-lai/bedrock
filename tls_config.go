@@ -10,7 +10,6 @@ import (
 type TLSConfig struct {
 	Name               string
 	InsecureSkipVerify bool   `yaml:"insecure_skip_verify"`
-	Cipher             string `yaml:"cipher"`
 	CaCert             string `yaml:"ca"`
 	ClientKey          string `yaml:"key"`
 	ClientCert         string `yaml:"cert"`
