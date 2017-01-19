@@ -1,7 +1,11 @@
 package bedrock
 
 import (
+	log "github.com/Sirupsen/logrus"
+	"github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
+	"net/url"
+	"strings"
 )
 
 type ConnectionHandler interface {
@@ -10,10 +14,11 @@ type ConnectionHandler interface {
 }
 
 type SQLConnectionHandler struct {
-	Dialect string
-	DSN     string
-	LogMode bool
-	db      *gorm.DB
+	Dialect    string
+	DSN        string
+	LogMode    bool
+	AutoCreate bool
+	db         *gorm.DB
 }
 
 // Returns a DB connection
@@ -25,7 +30,21 @@ func (c *SQLConnectionHandler) DB() (*gorm.DB, error) {
 
 	db, err := gorm.Open(c.Dialect, c.DSN)
 	if err != nil {
-		return nil, err
+		// MySQLError 1049 is for "unknown database"
+		if myerr, ok := err.(*mysql.MySQLError); ok && myerr.Number == 1049 && c.AutoCreate {
+			log.Debugf("got error %v while connecting; going to create database", err)
+
+			if err = c.Create(); err != nil {
+				return nil, err
+			}
+
+			db, err = gorm.Open(c.Dialect, c.DSN)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, err
+		}
 	}
 	db.LogMode(c.LogMode)
 	c.db = db
@@ -37,6 +56,25 @@ func (c *SQLConnectionHandler) Close() {
 	if c.db != nil {
 		c.db.Close()
 	}
+}
+
+func (c *SQLConnectionHandler) Create() error {
+	u, err := url.Parse(c.DSN)
+	if err != nil {
+		return err
+	}
+
+	dbName := u.Opaque[strings.Index(u.Opaque, "/")+1:]
+	u.Opaque = u.Opaque[0 : strings.Index(u.Opaque, "/")+1]
+
+	cdb, err := gorm.Open(c.Dialect, u.String())
+	if err != nil {
+		return err
+	}
+	defer cdb.Close()
+
+	log.Infof("creating database %s", dbName)
+	return cdb.Exec("CREATE DATABASE IF NOT EXISTS `" + dbName + "`").Error
 }
 
 type SimpleConnectionHandler struct {
