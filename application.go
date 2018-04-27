@@ -2,8 +2,8 @@ package bedrock
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
-	logrus_syslog "github.com/Sirupsen/logrus/hooks/syslog"
+	log "github.com/sirupsen/logrus"
+	logrus_syslog "github.com/sirupsen/logrus/hooks/syslog"
 	"github.com/codegangsta/cli"
 	"gopkg.in/yaml.v2"
 	"log/syslog"

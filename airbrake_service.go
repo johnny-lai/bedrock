@@ -3,7 +3,7 @@ package bedrock
 import (
 	"errors"
 	"fmt"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/airbrake/gobrake.v2"
 	"net/http"

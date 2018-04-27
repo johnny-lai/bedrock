@@ -1,10 +1,10 @@
-// Based on vendor/github.com/Sirupsen/logrus/text_formatter.go
+// Based on vendor/github.com/sirupsen/logrus/text_formatter.go
 package bedrock
 
 import (
 	"bytes"
 	"fmt"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"sort"
 	"time"
 )

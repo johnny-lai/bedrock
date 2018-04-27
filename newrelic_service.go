@@ -1,7 +1,7 @@
 package bedrock
 
 import (
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/gin-gonic/contrib/newrelic"
 	"github.com/gin-gonic/gin"
 )

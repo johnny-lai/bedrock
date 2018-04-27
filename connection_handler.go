@@ -1,7 +1,7 @@
 package bedrock
 
 import (
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"net/url"
