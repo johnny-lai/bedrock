@@ -51,7 +51,7 @@ func (f *LogTextFormatter) Format(entry *log.Entry) ([]byte, error) {
 
 	timestampFormat := f.TimestampFormat
 	if timestampFormat == "" {
-		timestampFormat = log.DefaultTimestampFormat
+		timestampFormat = time.RFC3339
 	}
 
 	f.printEntry(b, entry, keys, timestampFormat)
